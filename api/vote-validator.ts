@@ -48,7 +48,8 @@ export class VoteValidator {
       if (!score) {
         return false;
       }
-      if (score!.instances > pointCounts[pointCount]) {
+      // we set score.instances in constructor
+      if (score.instances! > pointCounts[pointCount]) {
         return false;
       }
     }

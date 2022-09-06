@@ -106,7 +106,7 @@ export class GhettoBackend {
 
         // filter out cheeky twats
         if (this.voteCandidates[vote.candidateId]) {
-          this.voteCandidates[vote.candidateId]!.votes += vote.points;
+          this.voteCandidates[vote.candidateId].votes! += vote.points;
         }
       }
     }
