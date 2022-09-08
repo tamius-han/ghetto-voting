@@ -143,4 +143,8 @@ export class GhettoBackend {
     // sort on frontend pls
     return candidateArray;
   }
+
+  getContestants() {
+    return this.voteCandidates;
+  }
 }
