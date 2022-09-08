@@ -1,3 +1,10 @@
 [
-  {"id": "0", "name": "sample name", "title": "Cosplay of this thing"}
+  {"id": "0", "name": "sample name", "title": "Cosplay of this thing"},
+  {"id": "1", "name": "Urkog", "title": "Cosplay of this thing", "image": "1.png"},
+  {"id": "2", "name": "Vrark", "title": "Cosplay of this thing"},
+  {"id": "3", "name": "Sonok", "title": "Cosplay of this thing"},
+  {"id": "4", "name": "Griša", "title": "Cosplay of this thing"},
+  {"id": "5", "name": "Thurak", "title": "Cosplay of this thing"},
+  {"id": "6", "name": "Vradakar", "title": "Cosplay of this thing"},
+  {"id": "7", "name": "Perra", "title": "Cosplay of this thing"}
 ]

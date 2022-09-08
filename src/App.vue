@@ -7,12 +7,33 @@
 </template>
 
 <style lang="scss">
+// fonts
+@font-face {
+  font-family: 'Josefin Sans';
+  src: url('./assets/fonts/josefinsans.ttf');
+}
+@font-face {
+  font-family: 'Josefin Sans';
+  font-style: italic;
+  src: url('./assets/fonts/josefinsans-italic.ttf');
+}
+// all else
+
+body, #app {
+  background-color: #000;
+  color: #ccc;
+
+  b {
+    color: #fff;
+  }
+}
+
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+  font-family: 'Josefin Sans', Helvetica, Arial, sans-serif;
+  // -webkit-font-smoothing: antialiased;
+  // -moz-osx-font-smoothing: grayscale;
+  // text-align: center;
+  // color: #2c3e50;
 }
 
 #nav {
@@ -20,7 +41,7 @@
 
   a {
     font-weight: bold;
-    color: #2c3e50;
+    // color: #2c3e50;
 
     &.router-link-exact-active {
       color: #42b983;
