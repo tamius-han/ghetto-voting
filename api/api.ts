@@ -30,12 +30,16 @@ export class Main {
       console.log('got contestant!');
       console.log('current dir:', process.cwd())
       console.log('exists data/images:', fs.readdirSync('./'))
-      res.set('image/webp');
-      res.send(fs.readFileSync(`data/images/${req.params.filename}`));
+      try {
+        res.set('image/webp');
+        res.send(fs.readFileSync(`data/images/${req.params.filename}`));
+      } catch (e) {
+        res.send({status: 404});
+      }
     });
 
     app.get('/my-votes', (req, res) => {
-      res.send(backend.getPublicVote(req.headers.authorization || ''));
+      res.send(backend.getPublicVote(req.headers.authorization || '') || []);
     });
 
     app.get('/public-votes', (req, res) => {
