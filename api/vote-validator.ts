@@ -44,12 +44,14 @@ export class VoteValidator {
     }
 
     for (const pointCount in pointCounts) {
-      const score = this.validatorConfig.validPublicScores.find(x => x.points === pointCounts[pointCount]);
+      const score = this.validatorConfig.validPublicScores.find(x => x.points === +pointCount);
       if (!score) {
+        console.warn('this guy tried to vote with an invalid score:', pointCount, this.validatorConfig.validPublicScores);
         return false;
       }
       // we set score.instances in constructor
       if (pointCounts[pointCount] > (score.instances ?? 0)) {
+        console.warn('this guy voted too much with given point count', pointCounts[pointCount], score.instances);
         return false;
       }
     }

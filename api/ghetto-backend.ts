@@ -34,6 +34,15 @@ export class GhettoBackend {
     if (fs.existsSync('data/voter-list.json')) {
       this.voters = JSON.parse(fs.readFileSync('data/voter-list.json', 'utf8'));
     }
+    if (fs.existsSync('data/votes.json')) {
+      this.voteRecords = new Map(
+        Object.entries(
+          JSON.parse(
+            fs.readFileSync('data/votes.json', 'utf8')
+          )
+        )
+      );
+    }
 
     this.wsServer = new WebSocketServer({port: 8888});
     this.wsServer.on('connection', (ws) => {
@@ -81,7 +90,7 @@ export class GhettoBackend {
       entriesArray.push(this.voteCandidates[vc]);
     }
 
-    fs.writeFileSync('conf/contest-entries.conf.json', JSON.stringify(entriesArray));
+    fs.writeFileSync('conf/contest-entries.conf.json', JSON.stringify(entriesArray, null, 2));
   }
 
   /**
@@ -116,6 +125,12 @@ export class GhettoBackend {
     }
 
     this.voteRecords.set(voterId, {voterId, votes: vote});
+    fs.writeFileSync(
+      'data/votes.json',
+      JSON.stringify(
+        Object.fromEntries(this.voteRecords)
+      )
+    );
   }
 
   setJuryVote(vote: Vote[]): void {

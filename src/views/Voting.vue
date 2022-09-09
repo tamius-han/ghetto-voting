@@ -196,6 +196,13 @@ export default class VotingComponent extends Vue {
     const res = await http.get('/my-votes');
     console.log('my votes:', res.data);
     this.myVotes = res.data.votes;
+
+    for (const contestant of this.contestants) {
+      contestant.myPoints = this.myVotes.find(x => x.candidateId === contestant.id)?.points ?? undefined;
+    }
+    for (const vote of this.myVotes) {
+      this.decreaseAvailableVotes(vote.points);
+    }
   }
 
   private async listContestants() {
@@ -204,6 +211,16 @@ export default class VotingComponent extends Vue {
     this.contestants = [];
     for (const c in res.data) {
       this.contestants.push(res.data[c]);
+    }
+  }
+
+  private async decreaseAvailableVotes(points: number) {
+    const si = this.currentAvailableVotesLeft.findIndex(x => x.points === points);
+    this.currentAvailableVotesLeft[si].instances--;
+
+    // remove spent scores
+    if (this.currentAvailableVotesLeft[si].instances === 0) {
+      this.currentAvailableVotesLeft.splice(si, 1);
     }
   }
 
@@ -255,15 +272,8 @@ export default class VotingComponent extends Vue {
       );
     }
 
-    // remove my other votes for this contestant!
+    this.decreaseAvailableVotes(points);
 
-    const si = this.currentAvailableVotesLeft.findIndex(x => x.points === points);
-    this.currentAvailableVotesLeft[si].instances--;
-
-    // remove spent scores
-    if (this.currentAvailableVotesLeft[si].instances === 0) {
-      this.currentAvailableVotesLeft.splice(si, 1);
-    }
     this.myVotes.push({candidateId: this.contestants[contestantIndex].id, points: points});
     this.contestants[contestantIndex].myPoints = points;
 
