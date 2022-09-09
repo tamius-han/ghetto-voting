@@ -1,4 +1,5 @@
 import express from 'express';
+import bodyParser from 'body-parser';
 import cors from 'cors';
 import { GhettoBackend } from './ghetto-backend';
 import fs from 'fs-extra';
@@ -9,6 +10,7 @@ export class Main {
     const port = 6969;
 
     const backend = new GhettoBackend();
+    const jsonParser = bodyParser.json();
 
     app.use(cors());
 
@@ -50,7 +52,7 @@ export class Main {
       );
     });
 
-    app.post('/vote', (req, res) => {
+    app.post('/vote', jsonParser, (req, res) => {
       const r = backend.setPublicVote(
         req.headers.authorization || '',
         req.body.votes
