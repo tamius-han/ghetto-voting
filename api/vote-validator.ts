@@ -49,7 +49,7 @@ export class VoteValidator {
         return false;
       }
       // we set score.instances in constructor
-      if (score.instances! > pointCounts[pointCount]) {
+      if (pointCounts[pointCount] > (score.instances ?? 0)) {
         return false;
       }
     }

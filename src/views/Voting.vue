@@ -33,7 +33,7 @@
           v-for="(contestant, index) of contestants"
           :key="contestant.id"
           class="contestant-option position-relative mb-2 mt-2 mx-md-2"
-          @click="setActiveContestant(index)"
+          @click.stop="setActiveContestant(index)"
         >
           <div class="image-container position-relative">
             <img v-if="contestant.image" :src="imageBaseUrl + contestant.image" />
@@ -56,7 +56,7 @@
             :class="{
               'has-vote': !!contestant.myPoints
             }"
-            @click="setActiveContestant(-1)"
+            @click.stop="setActiveContestant(-1)"
           >
 
             <!-- naslov -->
@@ -79,6 +79,7 @@
                 'reassign-vote': !contestant.myPoints && !currentAvailableVotesLeft.find(x => x.points === voteOption.points),
                 'change-points': myVotes.find(x => x.candidateId === contestant.id && x.points !== voteOption.points)
               }"
+              @click.stop="voteFor(index, voteOption.points)"
             >
               <div class="col-3 d-flex flex-column justify-content-center align-items-center">
                 <div class="point-value">{{voteOption.points}}</div>
@@ -86,7 +87,6 @@
               </div>
               <div
                 class="col-9 vote d-flex flex-row justify-content-center align-items-center"
-                @click="voteFor(index, voteOption.points)"
               >
                 <div class="vote-normal">PODELI GLAS</div>
                 <div class="vote-special">
@@ -108,20 +108,23 @@
               <div class="title">{{contestant.title}}</div>
               <div class="name">{{contestant.name}}</div>
             </div>
-            {{activeContestantVoteMenu}} | {{index}}
             <div class="flex-grow-0 flex-shrink-0 d-flex justify-content-center align-items-center">
               <div
                 v-if="!contestant.myPoints"
                 class="m-2 p-3 vote-button cursor-pointer"
-                @click="setActiveContestant(index)"
               >
                 GLASUJ
               </div>
               <div
                 v-else
-                class="m-2 p-3 vote-button cursor-pointer"
+                class="m-2 p-3 vote-button cursor-pointer voted"
               >
-                {{contestant.myPoints}} TOČK
+                <template v-if="availableVotes.length > 2">
+                  {{contestant.myPoints}} TOČK
+                </template>
+                <template v-else>
+                  UMAKNI GLAS
+                </template>
               </div>
             </div>
           </div>
@@ -151,12 +154,24 @@ export default class VotingComponent extends Vue {
   myVotes: Vote[] = [];
   activeContestantVoteMenu?: number = -1;
 
+  ws?: WebSocket;
+
   async created() {
     await this.getId();
     this.imageBaseUrl = `${http.defaults.baseURL}contestant/image/`;
     await this.listContestants();  // must be loaded _before_ user's current votes load
     await this.getVoteConfig();
     await this.getMyVotes();
+
+    this.ws = new WebSocket(`ws://${window.location.hostname}:8888`);
+    this.ws.addEventListener('message', (event) => {
+      const data = JSON.parse(event.data);
+      if (data.cmd === 'set-image') {
+        this.contestants.find(
+          x => x.id === data.candidateId
+        ).image = data.image;
+      }
+    });
   }
 
   private async getId() {
@@ -204,7 +219,6 @@ export default class VotingComponent extends Vue {
   async voteFor(contestantIndex: number, points: number): Promise<void> {
     // find if we already voted for this user
     if (this.contestants[contestantIndex].myPoints) {
-      console.log('we already voted on this contestant!')
       const v = this.currentAvailableVotesLeft.find(x => x.points === this.contestants[contestantIndex].myPoints);
       if (v) {
         v.instances++;
@@ -212,15 +226,24 @@ export default class VotingComponent extends Vue {
         this.currentAvailableVotesLeft.push({points: this.contestants[contestantIndex].myPoints, instances: 1});
       }
 
+      const isRevoke = this.contestants[contestantIndex].myPoints === points;
+
       // revoke from myVotes
       this.myVotes = this.myVotes.filter(x => x.candidateId !== this.contestants[contestantIndex].id);
+      this.contestants[contestantIndex].myPoints = undefined;
+
+      // if we're revoking rather than changing the vote, we're done here
+      if (isRevoke) {
+        await http.post('vote', {votes: this.myVotes});
+        return;
+      }
     }
 
     // this means we need to re-assign votes
     if (! this.currentAvailableVotesLeft.find(x => x.points === points)) {
       console.log('no available votes with this pint value > clearing existing votes');
       // remove existing votes for this score
-      this.myVotes = this.myVotes.filter(x => x.points === points);
+      this.myVotes = this.myVotes.filter(x => x.points !== points);
       this.contestants = this.contestants.map(x => ({
         ...x,
         myPoints: x.myPoints === points ? 0 : x.myPoints
@@ -241,7 +264,7 @@ export default class VotingComponent extends Vue {
     if (this.currentAvailableVotesLeft[si].instances === 0) {
       this.currentAvailableVotesLeft.splice(si, 1);
     }
-    this.myVotes.push({candidateId: this.contestants[contestantIndex].candidateId, points: points});
+    this.myVotes.push({candidateId: this.contestants[contestantIndex].id, points: points});
     this.contestants[contestantIndex].myPoints = points;
 
     // update backend. Validating whether user voted at appropriate should be done on the backend.
@@ -327,7 +350,7 @@ export default class VotingComponent extends Vue {
 
   &.has-vote {
     .vote-option.revocation {
-      background-color: rgba(#fa6, 0.69);
+      background-color: rgba(rgba(255,152,69,0.69), 0.69);
       color: #fff;
     }
   }
@@ -390,8 +413,13 @@ export default class VotingComponent extends Vue {
 }
 
 .vote-button {
-  border: 1px solid #fa6;
-  color: #fa6;
+  border: 1px solid rgba(255,152,69,0.69);
+  color: rgba(255,152,69,0.69);
+
+  &.voted {
+    background-color: rgba(255, 152, 69, 0.90);
+    color: #000;
+  }
 }
 
 .small {
