@@ -2,6 +2,7 @@ import { VoteCandidate } from './../common/types/vote-candidate.interface';
 import { Vote, VoteRecord } from '../common/types/vote-record.interface';
 import { VoteValidator } from './vote-validator';
 import fs from 'fs-extra';
+import WebSocket, {WebSocketServer} from 'ws';
 
 export class GhettoBackend {
   voteRecords: Map<string, VoteRecord>;
@@ -14,6 +15,9 @@ export class GhettoBackend {
     publicVoteWeight: 1,
     juryVoteWeight: 1
   };
+
+  wsServer: WebSocketServer;
+  sockets: WebSocket[] = [];
 
   constructor() {
     this.voteRecords = new Map<string, VoteRecord>();
@@ -30,6 +34,14 @@ export class GhettoBackend {
     if (fs.existsSync('data/voter-list.json')) {
       this.voters = JSON.parse(fs.readFileSync('data/voter-list.json', 'utf8'));
     }
+
+    this.wsServer = new WebSocketServer({port: 8888});
+    this.wsServer.on('connection', (ws) => {
+      ws.on('message', (data) => {
+        console.log('got data', data);
+      })
+      this.sockets.push(ws);
+    })
   }
 
   /**
@@ -45,9 +57,31 @@ export class GhettoBackend {
       if (this.voters.includes(idCandidate)) {
         continue;
       }
+
+      // update and save voter list
       this.voters.push(idCandidate);
+      fs.writeFileSync('data/voter-list.json', JSON.stringify(this.voters));
       return idCandidate;
     }
+  }
+
+  registerCandidateImage(contestantId: string, pictureFileName: string): void {
+    this.voteCandidates[contestantId].image = pictureFileName;
+
+    for (const s of this.sockets) {
+      s.send(JSON.stringify({
+        cmd: 'set-image',
+        candidateId: contestantId,
+        image: pictureFileName
+      }));
+    }
+
+    const entriesArray: any[] = [];
+    for (const vc in this.voteCandidates) {
+      entriesArray.push(this.voteCandidates[vc]);
+    }
+
+    fs.writeFileSync('conf/contest-entries.conf.json', JSON.stringify(entriesArray));
   }
 
   /**

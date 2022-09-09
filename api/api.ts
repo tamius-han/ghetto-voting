@@ -28,6 +28,7 @@ export class Main {
     app.get('/contestants', (req, res) => {
       res.send(backend.getContestants());
     });
+
     app.get('/contestant/image/:filename', (req, res) => {
       console.log('got contestant!');
       console.log('current dir:', process.cwd())
@@ -38,6 +39,20 @@ export class Main {
       } catch (e) {
         res.send({status: 404});
       }
+    });
+
+    app.post('/contestant/:id/image', jsonParser, (req, res) => {
+      console.log(
+        "Trying to set image for contestant:",
+        req.params.id,
+        "; img:",
+        req.body.image
+      );
+      console.log('body?', req.body);
+      const r = backend.registerCandidateImage(req.params.id, req.body.image);
+      res.send({
+        result: r
+      });
     });
 
     app.get('/my-votes', (req, res) => {
