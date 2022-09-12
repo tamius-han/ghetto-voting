@@ -59,12 +59,8 @@ export class Main {
       res.send(backend.getPublicVote(req.headers.authorization || '') || []);
     });
 
-    app.get('/public-votes', (req, res) => {
-      res.send(
-        {
-          results: backend.getVotingResults()
-        }
-      );
+    app.get('/results', (req, res) => {
+      res.send(backend.getVotingResults());
     });
 
     app.post('/vote', jsonParser, (req, res) => {

@@ -1,10 +1,119 @@
 [
-  {"id": "0", "name": "sample name", "title": "Cosplay of this thing"},
-  {"id": "1", "name": "Urkog", "title": "Cosplay of this thing", "image": "1.png"},
-  {"id": "2", "name": "Vrark", "title": "Cosplay of this thing"},
-  {"id": "3", "name": "Sonok", "title": "Cosplay of this thing"},
-  {"id": "4", "name": "Griša", "title": "Cosplay of this thing"},
-  {"id": "5", "name": "Thurak", "title": "Cosplay of this thing"},
-  {"id": "6", "name": "Vradakar", "title": "Cosplay of this thing"},
-  {"id": "7", "name": "Perra", "title": "Cosplay of this thing"}
+  {
+    "id": "0",
+    "title": "sir William Harryngton",
+    "name": "David Glavič",
+    "votes": 0,
+    "juryVotes": null,
+    "combinedVotes": null,
+    "image": "1872.jpg"
+  },
+  {
+    "id": "1",
+    "title": "Ra'hul",
+    "name": "Marko?",
+    "votes": 0,
+    "juryVotes": null,
+    "combinedVotes": null,
+    "image": "1879.jpg"
+  },
+  {
+    "id": "2",
+    "name": "Uroš Jerman",
+    "title": "CS:GO terrorist",
+    "votes": 0,
+    "juryVotes": null,
+    "combinedVotes": null,
+    "image": "1891.jpg"
+  },
+  {
+    "id": "3",
+    "name": "Luka Golob",
+    "title": "Abdal Alhazred",
+    "votes": 0,
+    "juryVotes": null,
+    "combinedVotes": null,
+    "image": "1936.jpg"
+  },
+  {
+    "id": "4",
+    "name": "Anja Višnikar",
+    "title": "Star Gate represel",
+    "votes": 0,
+    "juryVotes": null,
+    "combinedVotes": null,
+    "image": "1968.jpg"
+  },
+  {
+    "id": "5",
+    "name": "Crow Master",
+    "title": "Žiga Pirih",
+    "votes": 0,
+    "juryVotes": null,
+    "combinedVotes": null,
+    "image": "1980.jpg"
+  },
+  {
+    "id": "6",
+    "name": "Anja Kočnik",
+    "title": "YUNISE",
+    "votes": 0,
+    "juryVotes": null,
+    "combinedVotes": null,
+    "image": "2025.jpg"
+  },
+  {
+    "id": "7",
+    "name": "ALJA :)",
+    "title": "LADY JESSICA (DUNE)",
+    "votes": 0,
+    "juryVotes": null,
+    "combinedVotes": null,
+    "image": "2053.jpg"
+  },
+  {
+    "id": "8",
+    "title": "Mongolian Lady",
+    "name": "Valentina",
+    "votes": 0,
+    "juryVotes": null,
+    "combinedVotes": null,
+    "image": "2073.jpg"
+  },
+  {
+    "id": "9",
+    "title": "NAFTNI PIRAT",
+    "name": "JANK",
+    "votes": 0,
+    "juryVotes": null,
+    "combinedVotes": null,
+    "image": "2101.jpg"
+  },
+  {
+    "id": "10",
+    "title": "Jezus, Marija in Jožef",
+    "name": "Mihael, marija in Ana",
+    "votes": 0,
+    "juryVotes": null,
+    "combinedVotes": null,
+    "image": "2117.jpg"
+  },
+  {
+    "id": "11",
+    "title": "Queen Jamala",
+    "name": "Anija",
+    "votes": 0,
+    "juryVotes": null,
+    "combinedVotes": null,
+    "image": "2140.jpg"
+  },
+  {
+    "id": "12",
+    "title": "MONI GOLDBERG",
+    "name": "Lipa",
+    "votes": 0,
+    "juryVotes": null,
+    "combinedVotes": null,
+    "image": "2167.jpg"
+  }
 ]

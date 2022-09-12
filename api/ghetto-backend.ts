@@ -75,6 +75,7 @@ export class GhettoBackend {
   }
 
   registerCandidateImage(contestantId: string, pictureFileName: string): void {
+    console.log('registering image — contestant/image', contestantId, pictureFileName);
     this.voteCandidates[contestantId].image = pictureFileName;
 
     for (const s of this.sockets) {
