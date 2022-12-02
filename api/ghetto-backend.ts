@@ -8,7 +8,8 @@ export class GhettoBackend {
   voteRecords: Map<string, VoteRecord>;
 
   voteValidatorService: VoteValidator;
-  voteCandidates: {[x: string]: VoteCandidate} = {};
+  voteCandidates: VoteCandidate[] = [],
+  processedVoteCandidates: {[x: string]: VoteCandidate} = {};
   voters: string[] = [];
 
   ghettoConf = {
@@ -23,12 +24,7 @@ export class GhettoBackend {
     this.voteRecords = new Map<string, VoteRecord>();
     this.voteValidatorService = new VoteValidator();
 
-    const voteCandidates: VoteCandidate[] = JSON.parse(
-      fs.readFileSync('conf/contest-entries.conf.json', 'utf8')
-    );
-    for (const candidate of voteCandidates) {
-      this.voteCandidates[candidate.id] = candidate;
-    }
+    this.reloadContestEntries();
 
     fs.ensureDirSync('data');
     if (fs.existsSync('data/voter-list.json')) {
@@ -51,6 +47,16 @@ export class GhettoBackend {
       })
       this.sockets.push(ws);
     })
+  }
+
+  private reloadContestEntries() {
+    this.voteCandidates = JSON.parse(
+      fs.readFileSync('conf/contest-entries.conf.json', 'utf8')
+    );
+    this.processedVoteCandidates = {};
+    for (const candidate of this.voteCandidates) {
+      this.processedVoteCandidates[candidate.id] = candidate;
+    }
   }
 
   /**
@@ -76,7 +82,7 @@ export class GhettoBackend {
 
   registerCandidateImage(contestantId: string, pictureFileName: string): void {
     console.log('registering image — contestant/image', contestantId, pictureFileName);
-    this.voteCandidates[contestantId].image = pictureFileName;
+    this.processedVoteCandidates[contestantId].image = pictureFileName;
 
     for (const s of this.sockets) {
       s.send(JSON.stringify({
@@ -87,8 +93,8 @@ export class GhettoBackend {
     }
 
     const entriesArray: any[] = [];
-    for (const vc in this.voteCandidates) {
-      entriesArray.push(this.voteCandidates[vc]);
+    for (const vc in this.processedVoteCandidates) {
+      entriesArray.push(this.processedVoteCandidates[vc]);
     }
 
     fs.writeFileSync('conf/contest-entries.conf.json', JSON.stringify(entriesArray, null, 2));
@@ -118,9 +124,9 @@ export class GhettoBackend {
    * @param vote
    */
   setPublicVote(voterId: string, vote: Vote[]): void {
-    if (!this.voters.includes(voterId)) {
-      throw new Error('NAUGHTY!');
-    }
+    // if (!this.voters.includes(voterId)) {
+    //   throw new Error('NAUGHTY!');
+    // }
     if (!this.voteValidatorService.validateVote(vote)) {
       throw new Error('INVALID_VOTE');
     }
@@ -144,9 +150,9 @@ export class GhettoBackend {
 
   getVotingResults() {
     // initialize vote counts
-    for (const cid in this.voteCandidates) {
-      this.voteCandidates[cid].votes = 0;
-      this.voteCandidates[cid].juryVotes = 0;
+    for (const cid in this.processedVoteCandidates) {
+      this.processedVoteCandidates[cid].votes = 0;
+      this.processedVoteCandidates[cid].juryVotes = 0;
     }
 
     // count public votes
@@ -155,8 +161,8 @@ export class GhettoBackend {
       for (const vote of voteRecord.votes) {
 
         // filter out cheeky twats
-        if (this.voteCandidates[vote.candidateId]) {
-          this.voteCandidates[vote.candidateId].votes! += vote.points;
+        if (this.processedVoteCandidates[vote.candidateId]) {
+          this.processedVoteCandidates[vote.candidateId].votes! += vote.points;
         }
       }
     }
@@ -164,8 +170,8 @@ export class GhettoBackend {
     // TODO: JURY VOTES
 
     const candidateArray = [];
-    for (const cid in this.voteCandidates) {
-      candidateArray.push(this.voteCandidates[cid]);
+    for (const cid in this.processedVoteCandidates) {
+      candidateArray.push(this.processedVoteCandidates[cid]);
     }
 
     // normalize votes between public and jury
@@ -195,6 +201,23 @@ export class GhettoBackend {
   }
 
   getContestants() {
-    return this.voteCandidates;
+    return this.processedVoteCandidates;
+  }
+
+  private saveContestants() {
+    fs.writeFileSync('conf/contest-entries.conf.json', JSON.stringify(this.voteCandidates));
+  }
+
+  addContestant(contestantData: VoteCandidate) {
+    this.voteCandidates.push(contestantData);
+    this.saveContestants();
+    this.reloadContestEntries();
+  }
+
+  updateContestant(contestant: VoteCandidate) {
+    const i = this.voteCandidates.findIndex(x => x.id === contestant.id);
+    this.voteCandidates[i] = contestant;
+    this.saveContestants();
+    this.reloadContestEntries();
   }
 }

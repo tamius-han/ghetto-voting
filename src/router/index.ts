@@ -2,6 +2,7 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import Home from '../views/Results.vue'
 import VotingComponent from '../views/Voting.vue'
 import ResultsComponent from '../views/Results.vue'
+import RegisterComponent from '../views/Register.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -18,6 +19,18 @@ const routes: Array<RouteRecordRaw> = [
     path: '/results',
     name: 'Rezultati',
     component: ResultsComponent
+  },
+
+  // {
+  //   path: '/juryVote',
+  //   name: 'Glasovanje žirije',
+  //   component: JuryVotingComponent
+  // },
+
+  {
+    path: '/prijava',
+    name: 'Prijavi se',
+    component: RegisterComponent
   },
   {
     path: '/about',

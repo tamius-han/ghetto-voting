@@ -1,119 +1,119 @@
 [
   {
     "id": "0",
-    "title": "sir William Harryngton",
-    "name": "David Glavič",
+    "title": "Masked vizard",
+    "name": "Jure Jeglič",
     "votes": 0,
     "juryVotes": null,
     "combinedVotes": null,
-    "image": "1872.jpg"
+    "image": "2.jpg"
   },
   {
     "id": "1",
-    "title": "Ra'hul",
-    "name": "Marko?",
+    "title": "Edge of sleep",
+    "name": "Grega Osredkar",
     "votes": 0,
-    "juryVotes": null,
-    "combinedVotes": null,
-    "image": "1879.jpg"
-  },
-  {
+    "juryVotes": 0,
+    "image": "6.jpg"
+  }, {
     "id": "2",
-    "name": "Uroš Jerman",
-    "title": "CS:GO terrorist",
+    "title": "Padre Vamypirt in Demonka",
+    "name": "MIhael in Marija",
     "votes": 0,
-    "juryVotes": null,
-    "combinedVotes": null,
-    "image": "1891.jpg"
-  },
-  {
+    "juryVotes": 0,
+    "image": "5.jpg"
+  }, {
     "id": "3",
-    "name": "Luka Golob",
-    "title": "Abdal Alhazred",
+    "title": "Rrd Vampire",
+    "name": "Vita Smon",
     "votes": 0,
-    "juryVotes": null,
-    "combinedVotes": null,
-    "image": "1936.jpg"
-  },
-  {
+    "juryVotes": 0,
+    "image": "11.jpg"
+  }, {
     "id": "4",
-    "name": "Anja Višnikar",
-    "title": "Star Gate represel",
+    "title": "Lakotnik",
+    "name": "Žiga",
     "votes": 0,
-    "juryVotes": null,
-    "combinedVotes": null,
-    "image": "1968.jpg"
+    "juryVotes": 0,
+    "image": "14.jpg"
   },
   {
     "id": "5",
-    "name": "Crow Master",
-    "title": "Žiga Pirih",
+    "title": "Marcel Versk",
+    "name": "David Pustotnik",
     "votes": 0,
-    "juryVotes": null,
-    "combinedVotes": null,
-    "image": "1980.jpg"
+    "juryVotes": 0,
+    "image": "7.jpg"
   },
   {
     "id": "6",
-    "name": "Anja Kočnik",
-    "title": "YUNISE",
+    "title": "Organic Sluznjo Witch",
+    "name": "Anja Morona",
     "votes": 0,
-    "juryVotes": null,
-    "combinedVotes": null,
-    "image": "2025.jpg"
+    "juryVotes": 0,
+    "image": "3.jpg"
   },
   {
     "id": "7",
-    "name": "ALJA :)",
-    "title": "LADY JESSICA (DUNE)",
+    "title": "Hermanos Rodriges",
+    "name": "Blaz Slabe in Zan Kralj",
     "votes": 0,
-    "juryVotes": null,
-    "combinedVotes": null,
-    "image": "2053.jpg"
+    "juryVotes": 0,
+    "image": "13.jpg"
   },
   {
     "id": "8",
-    "title": "Mongolian Lady",
-    "name": "Valentina",
+    "title": "Sam The Impaler",
+    "name": "Samo Hafner",
     "votes": 0,
-    "juryVotes": null,
-    "combinedVotes": null,
-    "image": "2073.jpg"
+    "juryVotes": 0,
+    "image": "10.jpg"
   },
   {
     "id": "9",
-    "title": "NAFTNI PIRAT",
-    "name": "JANK",
+    "title": "Mall Ninja",
+    "name": "Jan Kontestabile",
     "votes": 0,
-    "juryVotes": null,
-    "combinedVotes": null,
-    "image": "2101.jpg"
+    "juryVotes": 0,
+    "image": "9.jpg"
   },
   {
     "id": "10",
-    "title": "Jezus, Marija in Jožef",
-    "name": "Mihael, marija in Ana",
+    "title": "Child Of NIght",
+    "name": "Alja",
     "votes": 0,
-    "juryVotes": null,
-    "combinedVotes": null,
-    "image": "2117.jpg"
+    "juryVotes": 0,
+    "image": "1.jpg"
   },
   {
     "id": "11",
-    "title": "Queen Jamala",
+    "title": "Master of Dark Paradise",
     "name": "Anija",
     "votes": 0,
-    "juryVotes": null,
-    "combinedVotes": null,
-    "image": "2140.jpg"
+    "juryVotes": 0,
+    "image": "4.jpg"
   },
   {
     "id": "12",
-    "title": "MONI GOLDBERG",
-    "name": "Lipa",
+    "title": "Edgy Bunny",
+    "name": "Luka",
     "votes": 0,
-    "juryVotes": null,
-    "combinedVotes": null,
-    "image": "2167.jpg"
+    "juryVotes": 0,
+    "image": "8.jpg"
+  }, {
+    "id": 13,
+    "name": "Valentina",
+    "title": "La Llorona",
+
+    "votes": 0,
+    "juryVotes": 0,
+    "image": "12.jpg"
+  }, {
+    "id": 14,
+    "name": "Patrik",
+    "title": "Patrik",
+
+    "votes": 0,
+    "juryVotes": 0
   }
 ]
