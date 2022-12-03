@@ -9,7 +9,8 @@ Aplikacija za glasovanje v costume contest kluba Amulet.
 
 "Ta koda je brez dvoma najslabša koda, ki sem jo spisal"  
 " — Ampak sem jo spisal."
-Pirati s karibov al nekej
+
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; :> Pirati s karibov al nekej
 
 ## Licenca
 
