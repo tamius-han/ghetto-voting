@@ -149,16 +149,6 @@ export default class VotingComponent extends Vue {
     await this.listContestants();  // must be loaded _before_ user's current votes load
     await this.getVoteConfig();
     await this.getMyVotes();
-
-    this.ws = new WebSocket(`ws://${window.location.hostname}:8888`);
-    this.ws.addEventListener('message', (event) => {
-      const data = JSON.parse(event.data);
-      if (data.cmd === 'set-image') {
-        this.contestants.find(
-          x => x.id === data.candidateId
-        ).image = data.image;
-      }
-    });
   }
 
   private async getId() {

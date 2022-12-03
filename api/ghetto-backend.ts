@@ -40,14 +40,6 @@ export class GhettoBackend {
         )
       );
     }
-
-    this.wsServer = new WebSocketServer({port: 8888});
-    this.wsServer.on('connection', (ws) => {
-      ws.on('message', (data) => {
-        console.log('got data', data);
-      })
-      this.sockets.push(ws);
-    })
   }
 
   private reloadContestEntries() {
