@@ -41,7 +41,6 @@ export default class ResultsComponent extends Vue {
   resultsByJury: any[] = [];
 
   async created() {
-    this.imageBaseUrl = `${http.defaults.baseURL}contestant/image/`;
     const res = await http.get('/results');
 
     this.results = JSON.parse(JSON.stringify(res.data)).sort((a: any,b: any) => {

@@ -1,5 +1,5 @@
 export interface VoteCandidate {
-  id: string,
+  id: number,
   name: string,
   image?: string,
   votes?: number,

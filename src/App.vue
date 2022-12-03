@@ -19,7 +19,12 @@
 }
 // all else
 
+body {
+  color: #000;
+}
+
 body, #app {
+  min-height: 100vh;
   background-color: #000;
   color: #ccc;
 
@@ -38,6 +43,7 @@ body, #app {
 
 #nav {
   padding: 30px;
+  background-color: #000;
 
   a {
     font-weight: bold;

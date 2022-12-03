@@ -1,5 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
+import fileUpload from 'express-fileupload';
 import cors from 'cors';
 import { GhettoBackend } from './ghetto-backend';
 import fs from 'fs-extra';
@@ -12,6 +13,7 @@ export class Main {
     const backend = new GhettoBackend();
     const jsonParser = bodyParser.json();
 
+    app.use(fileUpload());
     app.use(cors());
 
 
@@ -29,30 +31,43 @@ export class Main {
       res.send(backend.getContestants());
     });
 
-    app.get('/contestant/image/:filename', (req, res) => {
+    app.get('/contestants/:id/image', (req, res) => {
       console.log('got contestant!');
       console.log('current dir:', process.cwd())
       console.log('exists data/images:', fs.readdirSync('./'))
       try {
         res.set('image/webp');
-        res.send(fs.readFileSync(`data/images/${req.params.filename}`));
+        res.send(fs.readFileSync(`data/images/${req.params.id}.webp`));
       } catch (e) {
         res.send({status: 404});
       }
     });
 
-    app.post('/contestant/:id/image', jsonParser, (req, res) => {
-      console.log(
-        "Trying to set image for contestant:",
-        req.params.id,
-        "; img:",
-        req.body.image
-      );
-      console.log('body?', req.body);
-      const r = backend.registerCandidateImage(req.params.id, req.body.image);
-      res.send({
-        result: r
-      });
+    app.post('/contestants/register', jsonParser, (req, res) => {
+      console.log('↘↘ registering contestant!', req.body);
+
+      res.send(backend.addContestant(req.body));
+    });
+
+    app.post('/contestants/:id', jsonParser, (req, res) => {
+      console.log('↘↘ updating contestant', req.params.id, 'new stuff:', req.body);
+
+      res.send(backend.updateContestant({...req.body, id: req.params.id}));
+    });
+
+    app.delete('/contestants/:id', jsonParser, (req, res) => {
+      console.log('↘↘ updating contestant', req.params.id);
+
+      res.send(backend.deleteContestant(+req.params.id));
+    });
+
+    app.post('/contestants/:id/image', (req, res)=> {
+      console.log('↘↘ updating image for contestant', req.params.id, ' — file:', req.files);
+
+      if (!req.files) {
+        return res.send({status: 400});
+      }
+      res.send(backend.addContestantImage(+req.params.id, req.files.image ?? req.files.file));
     });
 
     app.get('/my-votes', (req, res) => {

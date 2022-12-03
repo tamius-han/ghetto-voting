@@ -3,12 +3,13 @@ import { Vote, VoteRecord } from '../common/types/vote-record.interface';
 import { VoteValidator } from './vote-validator';
 import fs from 'fs-extra';
 import WebSocket, {WebSocketServer} from 'ws';
+import sharp from 'sharp';
 
 export class GhettoBackend {
   voteRecords: Map<string, VoteRecord>;
 
   voteValidatorService: VoteValidator;
-  voteCandidates: VoteCandidate[] = [],
+  voteCandidates: VoteCandidate[] = [];
   processedVoteCandidates: {[x: string]: VoteCandidate} = {};
   voters: string[] = [];
 
@@ -209,14 +210,45 @@ export class GhettoBackend {
   }
 
   addContestant(contestantData: VoteCandidate) {
-    this.voteCandidates.push(contestantData);
+    const nextId = this.voteCandidates.length;
+    this.voteCandidates.push({...contestantData, id: nextId});
     this.saveContestants();
     this.reloadContestEntries();
   }
 
   updateContestant(contestant: VoteCandidate) {
     const i = this.voteCandidates.findIndex(x => x.id === contestant.id);
+
+    if (i !== -1) {
+      throw 'CONTESTANT_DOES_NOT_EXIST';
+    }
+
     this.voteCandidates[i] = contestant;
+    this.saveContestants();
+    this.reloadContestEntries();
+  }
+
+  addContestantImage(contestantId: number, image: any) {
+    console.log('adding contestant image. data:', image, image.data);
+    sharp(image.data)
+      .resize(1080)
+      .webp({
+        quality: 80,
+        effort: 6
+      })
+      .toFile(`data/images/${contestantId}.webp`);
+  }
+
+  deleteContestant(contestantId: number) {
+    // correct contestant images, because removing contestant will change IDs
+    for (let i = contestantId + 1; i < this.voteCandidates.length; i++) {
+      if (fs.existsSync(`data/images/${i}.webp`)) {
+        fs.moveSync(`data/images/${i}.webp`, `data/images/${i - 1}.webp`, { overwrite: true });
+      }
+    }
+
+    const deletedEntry = this.voteCandidates.splice(contestantId, 1);
+    console.log('deleted contestant:', deletedEntry);
     this.saveContestants();
     this.reloadContestEntries();
   }

@@ -1,6 +1,5 @@
 <template>
   <div class="h-100">
-    <div class="header">Žirija n stuff</div>
     <div class="remaining-votes-header d-flex flex-row sticky-top w-100">
       <div class="d-flex flex-column justify-content-center align-items-center w-100 p-2">
         <div class="smaller">NEPODELJENI GLASOVI:</div>
@@ -36,18 +35,7 @@
           @click.stop="setActiveContestant(index)"
         >
           <div class="image-container position-relative">
-            <img v-if="contestant.image" :src="imageBaseUrl + contestant.image" />
-            <template v-else>
-              <img src="../assets/images/centaur.webp">
-              <div class="position-absolute d-flex justify-content-center align-items-center h-100 w-100 top-0 left-0">
-                <div class="no-image-overlay text-center">
-                  <b>Ni slike</b><br/>
-                  Verjetno zato, ker se kostum še ni prikazal na oder.<br/>
-                  <small>Ali pa kentaver Rajko demonstrira.</small>
-                </div>
-              </div>
-            </template>
-
+            <img class="contestant-image" :src="imageBaseUrl + contestant.id + '/image'" loading="lazy" alt="&nbsp;"/>
           </div>
 
           <div
@@ -60,7 +48,6 @@
           >
 
             <!-- naslov -->
-            <pre>id: {{contestant.id}}; has-vote: {{!!contestant.myPoints}}</pre>
             <div class="title">
               {{contestant.title}}
             </div>
@@ -158,7 +145,7 @@ export default class VotingComponent extends Vue {
 
   async created() {
     await this.getId();
-    this.imageBaseUrl = `${http.defaults.baseURL}contestant/image/`;
+    this.imageBaseUrl = `${http.defaults.baseURL}contestants/`;
     await this.listContestants();  // must be loaded _before_ user's current votes load
     await this.getVoteConfig();
     await this.getMyVotes();
@@ -324,6 +311,33 @@ export default class VotingComponent extends Vue {
 
 .no-image-overlay {
   padding: 2rem;
+}
+
+.contestant-image {
+  &:before {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    content: ' ';
+    background: url('../assets/images/centaur.webp');
+    background-position: center;
+    background-size: cover;
+  }
+  &:after {
+    content: 'uwu upsi wupsi, j... bebek.\ani slike :(';
+    display: block;
+    position: absolute;
+    white-space: pre;
+    top: 50%;
+    width: 100%;
+    transform: translateY(-50%);
+    background-color: rgba(0,0,0,0.69);
+    color: #fff;
+    text-align: center;
+    padding: 1rem;
+    font-size: 1.5rem;
+    font-weight: 300;
+  }
 }
 
 .contestant-info-row {
