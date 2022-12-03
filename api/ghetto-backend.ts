@@ -72,15 +72,7 @@ export class GhettoBackend {
 
   registerCandidateImage(contestantId: string, pictureFileName: string): void {
     console.log('registering image — contestant/image', contestantId, pictureFileName);
-    this.processedVoteCandidates[contestantId].image = pictureFileName;
-
-    for (const s of this.sockets) {
-      s.send(JSON.stringify({
-        cmd: 'set-image',
-        candidateId: contestantId,
-        image: pictureFileName
-      }));
-    }
+    this.processedVoteCandidates[+contestantId].image = pictureFileName;
 
     const entriesArray: any[] = [];
     for (const vc in this.processedVoteCandidates) {
