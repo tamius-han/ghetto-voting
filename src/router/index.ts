@@ -3,6 +3,7 @@ import Home from '../views/Results.vue'
 import VotingComponent from '../views/Voting.vue'
 import ResultsComponent from '../views/Results.vue'
 import RegisterComponent from '../views/Register.vue'
+import AdminComponent from '../views/Admin.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -31,6 +32,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/prijava',
     name: 'Prijavi se',
     component: RegisterComponent
+  },
+  {
+    path: '/admin',
+    name: 'Administracija',
+    component: AdminComponent
   },
   {
     path: '/about',
