@@ -18,9 +18,6 @@ export class GhettoBackend {
     juryVoteWeight: 1
   };
 
-  wsServer: WebSocketServer;
-  sockets: WebSocket[] = [];
-
   constructor() {
     this.voteRecords = new Map<string, VoteRecord>();
     this.voteValidatorService = new VoteValidator();
