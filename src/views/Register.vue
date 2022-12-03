@@ -47,8 +47,8 @@
           <div v-if="deletingIndex === index">
             <b>A si čist čist zih da hočeš brisat?</b>
             <div class="flex flex-row">
+              <div class="button" @click="startDelete()">Ne, naredu sm upsi</div>
               <div class="button red" @click="deleteContestant(index)">Da, res</div>
-              <div class="button red" @click="startDelete()">Ne, naredu sm upsi</div>
             </div>
           </div>
         </div>
@@ -262,6 +262,7 @@ export default class RegisterComponent extends Vue {
     }
     this.deletingIndex = undefined;
     this.cancelAddEdit();
+    this.getContestants();
   }
 }
 </script>
@@ -344,6 +345,16 @@ export default class RegisterComponent extends Vue {
   background-color: #000;
   color: #fa6;
   cursor: pointer;
+
+  &.red {
+    background-color: rgb(123, 12, 28);
+    color: rgb(254, 193, 143);
+
+    &:hover {
+      background-color: rgb(239, 11, 45);
+      color: #000;
+    }
+  }
 
   &:hover {
     color: #000;
