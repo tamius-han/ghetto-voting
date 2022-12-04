@@ -141,8 +141,6 @@ export default class VotingComponent extends Vue {
   myVotes: Vote[] = [];
   activeContestantVoteMenu?: number = -1;
 
-  ws?: WebSocket;
-
   async created() {
     await this.getId();
     this.imageBaseUrl = `${http.defaults.baseURL}contestants/`;

@@ -81,7 +81,10 @@
               :key="contestant.id"
             >
               <b>{{(index + 1)}}.: {{contestant.title}}</b> by <i>{{contestant.name}}</i><br/>
-              <small>Točk: {{contestant.combinedScore}}; glasov: {{contestant.votes}}; ocena žirije: {{contestant.juryVotes}}</small>
+              <small>
+                Točk: {{contestant.combinedScore}}; (ljudstvo: {{contestant.combinedScoreMakeup.public}}, žirija: {{contestant.combinedScoreMakeup.jury}}, Chuck: {{contestant.combinedScoreMakeup.chuck}})<br/>
+                glasov: {{contestant.votes}}; ocena žirije: {{contestant.juryVotes}}
+              </small>
             </div>
           </div>
         </div>
@@ -108,7 +111,7 @@
 
           <div>
             <div
-              v-for="(contestant, index) of results.public"
+              v-for="(contestant, index) of results.jury"
               :key="contestant.id"
             >
               <b>{{(index + 1)}}.: {{contestant.title}}</b> by <i>{{contestant.name}}</i><br/>
@@ -202,7 +205,12 @@ export default class AdminComponent extends Vue {
         combinedScore:
           (sortedPublic[i].intermediateScore ?? 0)
           + (sortedJury[i].intermediateScore ? sortedJury[i].intermediateScore + this.juryPrecedence: 0)
-          + (this.chuckNorrisVotes.find((x: any) => x.id === sortedPublic[i].id) ?? 0)
+          + (this.chuckNorrisVotes.find((x: any) => x.id === sortedPublic[i].id) ?? 0),
+        combinedScoreMakeup: {
+          public: (sortedPublic[i].intermediateScore ?? 0),
+          jury: (sortedJury[i].intermediateScore ? sortedJury[i].intermediateScore + this.juryPrecedence: 0),
+          chuck: (this.chuckNorrisVotes.find((x: any) => x.id === sortedPublic[i].id) ?? 0)
+        }
       })
     }
 
