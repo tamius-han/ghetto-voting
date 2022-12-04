@@ -32,9 +32,6 @@ export class Main {
     });
 
     app.get('/contestants/:id/image', (req, res) => {
-      console.log('got contestant!');
-      console.log('current dir:', process.cwd())
-      console.log('exists data/images:', fs.readdirSync('./'))
       try {
         res.set('image/webp');
         res.send(fs.readFileSync(`data/images/${req.params.id}.webp`));
