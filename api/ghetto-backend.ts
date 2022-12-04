@@ -2,7 +2,6 @@ import { VoteCandidate } from './../common/types/vote-candidate.interface';
 import { Vote, VoteRecord } from '../common/types/vote-record.interface';
 import { VoteValidator } from './vote-validator';
 import fs from 'fs-extra';
-import WebSocket, {WebSocketServer} from 'ws';
 import sharp from 'sharp';
 
 export class GhettoBackend {
@@ -37,6 +36,16 @@ export class GhettoBackend {
         )
       );
     }
+
+    // save votes every 30 seconds
+    setInterval(() => {
+      fs.writeFileSync(
+        'data/votes.json',
+        JSON.stringify(
+          Object.fromEntries(this.voteRecords)
+        )
+      );
+    }, 30000);
   }
 
   private reloadContestEntries() {
@@ -114,12 +123,6 @@ export class GhettoBackend {
     }
 
     this.voteRecords.set(voterId, {voterId, votes: vote});
-    fs.writeFileSync(
-      'data/votes.json',
-      JSON.stringify(
-        Object.fromEntries(this.voteRecords)
-      )
-    );
   }
 
   setJuryVote(vote: Vote[]): void {
