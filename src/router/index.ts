@@ -1,50 +1,45 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
-import Home from '../views/Results.vue'
+// import Home from '../views/Results.vue'
 import VotingComponent from '../views/Voting.vue'
-import ResultsComponent from '../views/Results.vue'
-import RegisterComponent from '../views/Register.vue'
-import AdminComponent from '../views/Admin.vue'
+// import JuryVotingComponent from '../views/JuryVoting.vue'
+// import ResultsComponent from '../views/Results.vue'
+// import RegisterComponent from '../views/Register.vue'
+// import AdminComponent from '../views/Admin.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'Home',
-    component: Home
+    component: VotingComponent
   },
   {
     path: '/vote',
     name: 'Glasuj',
     component: VotingComponent
   },
-  {
-    path: '/results',
-    name: 'Rezultati',
-    component: ResultsComponent
-  },
-
   // {
-  //   path: '/juryVote',
-  //   name: 'Glasovanje žirije',
-  //   component: JuryVotingComponent
+  //   path: '/results',
+  //   name: 'Rezultati',
+  //   component: ResultsComponent
   // },
+  {
+    path: '/jury',
+    name: 'Glasovanje žirije',
+    // component: JuryVotingComponent
+    component: () => import(/* webpackChunkName: "jury" */ '../views/JuryVoting.vue')
+  },
 
   {
     path: '/prijava',
     name: 'Prijavi se',
-    component: RegisterComponent
+    // component: RegisterComponent
+    component: () => import(/* webpackChunkName: "register" */ '../views/Register.vue')
   },
   {
     path: '/admin',
     name: 'Administracija',
-    component: AdminComponent
-  },
-  {
-    path: '/about',
-    name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
+    // component: AdminComponent
+    component: () => import(/* webpackChunkName: "admin" */ '../views/Admin.vue')
   }
 ]
 
