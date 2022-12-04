@@ -55,8 +55,11 @@
                 v-for="(juryMember, juryIndex) of juryMembers"
                 :key="juryMember"
                 class="jury-vote-field"
+                :class="{
+                  'error': juryVotes[index][juryIndex] && isNaN(+(juryVotes[index][juryIndex].replace(',', '.')))
+                }"
               >
-                <div>{{juryMember}} .. {{juryVotes[index][juryIndex]}}</div>
+                <div class="label">{{juryMember}}</div>
                 <input v-model="juryVotes[index][juryIndex]" @blur="updateJuryVotes()" @keydown.enter="updateJuryVotes()" />
               </div>
             </div>
@@ -93,9 +96,10 @@ export default class JuryVotingComponent extends Vue {
   contestants: any[] = [];
   imageBaseUrl?: string;
 
-  created() {
+  async created() {
     this.imageBaseUrl = `${http.defaults.baseURL}contestants/`;
-    this.getContestants();
+    await this.getContestants();
+    await this.getJuryVotes();
   }
 
   private async getContestants() {
@@ -105,6 +109,17 @@ export default class JuryVotingComponent extends Vue {
     for (const c in res.data) {
       this.contestants.push(res.data[c]);
       this.juryVotes.push([]);
+    }
+  }
+
+  private async getJuryVotes() {
+    const res = await http.get('/jury-votes');
+    if (res.data.votes && res.data.votes.length === this.juryVotes.length) {
+      for (let i = 0; i < res.data.votes.length; i++ ) {
+        for (let j = 0; j < res.data.votes[i].length; j++) {
+          this.juryVotes[i][j] = `${res.data.votes[i][j]}`;
+        }
+      }
     }
   }
 
@@ -136,12 +151,21 @@ export default class JuryVotingComponent extends Vue {
 
   updateJuryVotes() {
     // ensure that we only send jury votes that exist
-    console.log('jury votes:', this.juryVotes);
-
     const voteCollection = JSON.parse(JSON.stringify(this.juryVotes));
     for (const contestant of voteCollection) {
       for (let i = this.jurySize; i < contestant.length; i++) {
         contestant[i] = undefined;
+      }
+      for (let i = 0; i < contestant.length; i++) {
+        if (contestant[i]) {
+          contestant[i] = +(contestant[i].replace(',', '.'));
+
+          if (isNaN(contestant[i])) {
+            console.warn('ena stvar tukaj ni številka. sussy.');
+            console.warn('ne bomo posredovali glasu')
+            return;
+          }
+        }
       }
     }
 
@@ -165,9 +189,39 @@ export default class JuryVotingComponent extends Vue {
   background-position: 55% center;
 }
 
+.jury-vote-field {
+  width: 100%;
+  input {
+    width: 100%;
+  }
+}
+
 .page-jury {
   position: relative;
   z-index: 1;
+}
+
+.error {
+  color: #000;
+  background-color: rgb(211, 24, 24);
+
+  input {
+    color: #f00;
+  }
+
+  .label:after {
+    content: ' — SEM NOTRI RABIŠ VNESIT ŠTEVILKO'
+  }
+}
+
+.image-container {
+  flex-grow: 0;
+  flex-shrink: 0;
+}
+
+.contestant-description-votes {
+  flex-grow: 1;
+  flex-shrink: 1;
 }
 
 .contestant-option {
@@ -191,7 +245,6 @@ export default class JuryVotingComponent extends Vue {
     font-weight: 300;
     opacity: 0.75;
   }
-
 }
 </style>
 
