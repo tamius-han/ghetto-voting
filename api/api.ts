@@ -83,9 +83,18 @@ export class Main {
       res.send(r);
     });
 
+    app.get('/jury-votes', (req, res) => {
+      res.send(backend.getJuryVote());
+    })
+
+    app.post('/jury-votes', jsonParser, (req, res) => {
+      res.send(backend.setJuryVote(req.body.votes));
+    })
+
     app.listen(port, () => {
       return console.log('haha voting machine go brrr');
     });
+
   }
 
 }

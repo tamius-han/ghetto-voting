@@ -10,7 +10,7 @@ export class GhettoBackend {
 
   voteValidatorService: VoteValidator;
   voteCandidates: VoteCandidate[] = [];
-  processedVoteCandidates: {[x: string]: VoteCandidate} = {};
+  processedVoteCandidates: {[x: number]: VoteCandidate} = {};
   voters: string[] = [];
 
   ghettoConf = {
@@ -142,42 +142,35 @@ export class GhettoBackend {
     for (const voteRecord of voteRecordsArray) {
       for (const vote of voteRecord.votes) {
 
+        // this is jury vote
+        if (!vote.points) {
+          continue;
+        }
+
         // filter out cheeky twats
-        if (this.processedVoteCandidates[vote.candidateId]) {
-          this.processedVoteCandidates[vote.candidateId].votes! += vote.points;
+        if (this.processedVoteCandidates[+vote.candidateId]) {
+          this.processedVoteCandidates[+vote.candidateId].votes! += vote.points;
         }
       }
     }
 
+    // count public votes
+    const juryVotes = this.voteRecords.get('jury') as unknown as any;
+    if (juryVotes) {
+      for (let i = 0; i < juryVotes.votes.length; i++) {
+        let sum = 0;
+        for (const v of juryVotes.votes[i]) {
+          sum += +v;
+        }
+        this.processedVoteCandidates[i].juryVotes = sum;
+      }
+    }
     // TODO: JURY VOTES
 
     const candidateArray = [];
     for (const cid in this.processedVoteCandidates) {
       candidateArray.push(this.processedVoteCandidates[cid]);
     }
-
-    // normalize votes between public and jury
-    let publicPoints = 0;
-    let juryPoints = 0;
-    for (const candidate of candidateArray) {
-      publicPoints += candidate.votes ?? 0;
-      juryPoints += candidate.juryVotes ?? 0;
-    }
-
-    // let's say 72 pub, 32 jur
-    // multiplier is x2.25. jury * multiplier gives 72 pub.
-
-    // then if public vote weighs 1 and jury vote weighs 2, we need to multiply that with 2 / 1 = 2
-
-    const juryScoreMultiplier =
-      (publicPoints / juryPoints)
-      * (this.ghettoConf.juryVoteWeight / this.ghettoConf.publicVoteWeight);
-
-    for (const candidate of candidateArray) {
-      candidate.juryVotes = (candidate.juryVotes ?? 0) * juryScoreMultiplier;
-      candidate.combinedVotes = (candidate.votes ?? 0) + candidate.juryVotes;
-    }
-
     // sort on frontend pls
     return candidateArray;
   }
