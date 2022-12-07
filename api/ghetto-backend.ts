@@ -26,6 +26,7 @@ export class GhettoBackend {
     this.reloadContestEntries();
 
     fs.ensureDirSync('data');
+    fs.ensureDirSync('conf');
     if (fs.existsSync('data/voter-list.json')) {
       const {voters, start} = JSON.parse(fs.readFileSync('data/voter-list.json', 'utf8'));
 
@@ -60,9 +61,11 @@ export class GhettoBackend {
   }
 
   private reloadContestEntries() {
-    this.voteCandidates = JSON.parse(
-      fs.readFileSync('conf/contest-entries.conf.json', 'utf8')
-    );
+    if (fs.existsSync('conf/contest-entries.conf.json')) {
+      this.voteCandidates = JSON.parse(
+        fs.readFileSync('conf/contest-entries.conf.json', 'utf8')
+      );
+    }
     this.processedVoteCandidates = {};
     for (const candidate of this.voteCandidates) {
       this.processedVoteCandidates[candidate.id] = candidate;
