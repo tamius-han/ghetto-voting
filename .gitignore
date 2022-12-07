@@ -23,3 +23,11 @@ pnpm-debug.log*
 *.sw?
 
 data/images/
+
+dist-app/
+
+conf/contest-entries.conf.json
+
+data/voter-list.json
+
+data/votes.json
