@@ -27,6 +27,8 @@ Koda: nared kar hočeš, stvar je itak prevečik podn za resno uporabo lol.
 
 ## Zagon
 
+### Za razvoj
+
 App:
 ```
 npm run serve
@@ -37,5 +39,19 @@ Api:
 npm run run-backend
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### Za deploy
+
+#### App:
+```
+npm run build
+```
+
+Stvari se pojavijo v `/dist-app`. To gre na nginx/apache/whatever se uporablja za web server. Pomembno je, da ima voting app svojo poddomeno, in da **ni kje drugje v kakšnem subdirektoriju** ker vue ni tko skonfiguriran. 
+
+#### Api
+
+Api rabi poslušat na isti domeni/poddomeni, port `6969` (hardkodiran, yes). Api nima narjen proper compilanja/whatevs, samo greš in poženeš isto kot za development:
+
+```
+npm run run-backend
+```

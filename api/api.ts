@@ -17,9 +17,22 @@ export class Main {
     app.use(cors());
 
 
+    app.get('/vote-start', (req, res) => {
+      res.send({
+        voteStart: +backend.voteStart
+      });
+    });
+
+    app.get('/last-public-vote', (req, res) => {
+      res.send({
+        lastPublicVoteTime: backend.lastPublicVoteTime
+      })
+    });
+
     app.get('/voter-id', (req, res) => {
       res.send({
-        id: backend.generateVoterId()
+        id: backend.generateVoterId(),
+        voteStart: +backend.voteStart
       });
     });
 
@@ -93,6 +106,22 @@ export class Main {
 
     app.listen(port, () => {
       return console.log('haha voting machine go brrr');
+    });
+
+    app.post('/reset/voting', jsonParser, (req, res) => {
+      if (req.headers.authorization === 'jakikaki') {
+        res.send(backend.resetVoting());
+      } else {
+        res.send({status: 403});
+      }
+    });
+
+    app.post('/reset/contestants', jsonParser, (req, res) => {
+      if (req.headers.authorization === 'jakikaki') {
+        res.send(backend.resetVoteCandidates());
+      } else {
+        res.send({status: 403});
+      }
     });
 
   }

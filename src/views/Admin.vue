@@ -2,7 +2,23 @@
   <div class="page-bg"></div>
   <div class="page-admin">
 
-    <div v-if="isAuthorized">
+    <div v-if="(passwordPhase === 0)">
+       <h2>No vodka, no passage.</h2>
+       <p>Give vodka, you passage.</p>
+       <input v-model="password" @input="checkPassword()"/>
+    </div>
+    <div v-if="(passwordPhase === 1)">
+      <h2>No vodka, no passage.</h2>
+      <p>Narobe, trolov pod mostovi se ne futra. Mrš.</p>
+      <input v-model="password" @input="checkPassword()"/>
+    </div>
+    <div v-if="(passwordPhase === 2)">
+      <h2>No vodka, no passage.</h2>
+      <p>That's the spirit! Unfortunately for you, you aren't allowed to feed the drunk troll under the bridge — even if you are a cultured individual.</p>
+      <input v-model="password" @input="checkPassword()"/>
+    </div>
+
+    <div v-if="(passwordPhase === 3)">
       <h1 class="text-center">
         Grûmšovi knofi in statistike
         <span
@@ -15,33 +31,32 @@
           <h3>Nadzor glasovanja</h3>
 
           <div>
-            Glasovanje je <span>ODPRTO</span><span>ZAPRTO</span><br/>
-            Začetek glasovanja: todo<br/>
-            Čas od zadnjega glasu:
+            Podatki se osvežijo vsakih 15 sekund ... ish.<br/>
+            <div class="refresh-line">
+              <div class="" :class="{'reset': activeRefresh, 'refresh-line-bar': !activeRefresh}"></div>
+            </div>
+            <template v-if="lastPublicVoteAgo">
+              Čas od zadnjega glasu: {{lastPublicVoteAgo}}
+            </template>
           </div>
 
           <div class="d-flex flex-row">
-            <div class="button">Počisti tekmovalce</div>
-            <div class="button">Začni novo glasovanje</div>
-            <div class="button">Nadaljuj glasovanje</div>
-            <div class="button">Ustavi glasovanje</div>
+            <div class="button" @click="resetContestants()">Počisti tekmovalce</div>
+            <div class="button" @click="resetVoting()">Resetiraj glasovanje</div>
           </div>
           <div></div>
         </div>
 
         <div class="panel">
           <h3>Nastavitve točkovanja</h3>
-          <div class="field">
-            <div class="label">Število žirantov:</div> <input /><br/>
-          </div>
-          <div class="d-flex flex-row">
-
-          </div>
+          <p>
+            Število žirantov se nastavi na strani za žirijo.
+          </p>
         </div>
       </div>
 
       <div class="">
-        <h1 class="text-center" style="font-size: 5rem; font-weight: 250">REZULTATI GLASOVANJA</h1>
+        <h1 class="text-center" style="font-size: 5rem; font-weight: 250; text-shadow: 0 0.02em 0.25rem black, 0 0.02em 0.25rem black, 0 0.02em 0.25rem black;">REZULTATI GLASOVANJA</h1>
 
         <div class="d-flex flex-row top3-row">
           <template v-for="(contestant, index) of results.combined" :key="index">
@@ -65,8 +80,12 @@
         </div>
 
       </div>
-      <div>
-        <h2>Skupni seštevki v celoti</h2>
+      <div class="text-center">
+        <div class="panel">
+          <h2>Skupni seštevki v celoti</h2>
+          <p>Če so rezulati obarvani <span class="tie master">oranžno</span>, potem so tekmovalci v skupnem seštevku izenačeni po točkah.</p>
+          <p>Če so rezulati obarvani <span class="tie segment">modro</span>, potem so tekmovalci izenačeni v podkategorijah. To ni problem — je pa treba vedeti, da izenačeni kandidati dobijo enako točk iz uvrstitve.</p>
+        </div>
       </div>
 
       <div class="d-flex flex-row result-panels" style="width: 100%">
@@ -79,11 +98,17 @@
             <div
               v-for="(contestant, index) of results.combined"
               :key="contestant.id"
+              :class="{
+                'tie master':
+                  (results?.combined[index -1] && results.combined[index -1].combinedScore === contestant.combinedScore)
+                  || (results?.combined[index + 1] && results.combined[index + 1].combinedScore === contestant.combinedScore)
+              }"
             >
+              {{}}
               <b>{{(index + 1)}}.: {{contestant.title}}</b> by <i>{{contestant.name}}</i><br/>
               <small>
-                Točk: {{contestant.combinedScore}}; (ljudstvo: {{contestant.combinedScoreMakeup.public}}, žirija: {{contestant.combinedScoreMakeup.jury}}, Chuck: {{contestant.combinedScoreMakeup.chuck}})<br/>
-                glasov: {{contestant.votes}}; ocena žirije: {{contestant.juryVotes}}
+                Točk: {{contestant.combinedScore}} <i><sub>(ljudstvo: {{contestant.combinedScoreMakeup.public}}, žirija: {{contestant.combinedScoreMakeup.jury}}, Chuck: {{contestant.combinedScoreMakeup.chuck}})</sub></i><br/>
+                <i><sub>glasov: {{contestant.votes}}; ocena žirije: {{contestant.juryVotes}}</sub></i>
               </small>
             </div>
           </div>
@@ -97,10 +122,15 @@
             <div
               v-for="(contestant, index) of results.public"
               :key="contestant.id"
+              :class="{
+                'tie segment':
+                  (results?.public[index - 1] && results.public[index - 1].votes === contestant.votes)
+                  || (results?.public[index + 1] && results.public[index + 1].votes === contestant.votes)
+              }"
             >
               <b>{{(index + 1)}}.: {{contestant.title}}</b> by <i>{{contestant.name}}</i><br/>
-              <small>Uvrstitev na {{(index + 1)}}. mesto po izboru publike prinese {{intermediateScoresArray[index]}} točk v skupnem seštevku.</small><br/>
-              <small>Glasov: {{contestant.votes}}; ocena žirije: {{contestant.juryVotes}}.</small>
+              <small>Z uvrstitvijo na to mesto je tekmovalec dosegel <b>{{contestant.intermediateScore}}</b> točk.</small><br/>
+              <small>Glasov: {{contestant.votes}} <i><sub> ocena žirije: {{contestant.juryVotes}}</sub></i></small>
             </div>
           </div>
         </div>
@@ -113,10 +143,15 @@
             <div
               v-for="(contestant, index) of results.jury"
               :key="contestant.id"
+              :class="{
+                'tie segment':
+                  (results?.jury[index - 1] && results.jury[index - 1].juryVotes === contestant.juryVotes)
+                  || (results?.jury[index + 1] && results.jury[index + 1].juryVotes === contestant.juryVotes)
+              }"
             >
               <b>{{(index + 1)}}.: {{contestant.title}}</b> by <i>{{contestant.name}}</i><br/>
-              <small>Uvrstitev na {{(index + 1)}}. mesto po izboru žirije prinese {{(intermediateScoresArray[index] ?? 0) + juryPrecedence}} točk v skupnem seštevku.</small><br/>
-              <small>Glasov: {{contestant.votes}}; ocena žirije: {{contestant.juryVotes}}.</small>
+              <small>Z uvrstitvijo na to mesto je tekmovalec dosegel <b>{{contestant.intermediateScore}}</b> točk.</small><br/>
+              <small>Ocena žirije: {{contestant.juryVotes}} <i><sub>Publika: {{contestant.votes}}</sub></i></small>
             </div>
           </div>
         </div>
@@ -135,7 +170,8 @@ import http from '@/http-common';
 })
 export default class AdminComponent extends Vue {
   imageBaseUrl = '';
-  isAuthorized = true;
+  passwordPhase = 0;
+  password = '';
 
   results: {
     rawData: any[],
@@ -152,11 +188,65 @@ export default class AdminComponent extends Vue {
   intermediateScoresArray = [12, 10, 8, 7, 6, 5, 4, 3, 2, 1];
   chuckNorrisVotes = [];
   juryPrecedence = 0;    // jury's intermediateScoresArray is by this much bigger than
+  lastPublicVoteAgo?: string = '';
+  activeRefresh = false;
 
-  async created() {
+  created() {
+    this.reloadContestants();
+    this.password = localStorage.getItem('pass-admin') ?? '';
+    this.checkPassword();
+
+    setInterval(() => this.reloadContestants(), 15000);
+  }
+
+  checkPassword() {
+    if (this.password === 'vodka') {
+      this.passwordPhase = 1;
+    }
+    if (this.password.toLocaleLowerCase().trim().startsWith('do i look like an innkeeper to you')) {
+      this.passwordPhase = 2;
+    }
+    if (this.password === 'jakikaki') {
+      this.passwordPhase = 3;
+    }
+
+    localStorage.setItem('pass-admin', this.password);
+  }
+
+  async reloadContestants() {
+    this.activeRefresh = true;
+    try {
+      const lastPublicVoteTs = (await http.get('/last-public-vote'))?.data?.lastPublicVoteTime;
+      if (lastPublicVoteTs) {
+        const diff = (+new Date()) - +lastPublicVoteTs;
+
+        if (diff > 600000) {
+          this.lastPublicVoteAgo = 'last public vote was waay ago (more than 10m)'
+        } else {
+          const min = Math.floor(diff / 60000);
+          const sec = ((diff - (+min * 60000))/1000).toFixed();
+
+          this.lastPublicVoteAgo = +min > 0 ? `${min}m ${sec}s` : `${sec}s`;
+        }
+      } else {
+        this.lastPublicVoteAgo = '';
+      }
+    } catch (e) {
+      console.warn('could not get last public vote time.')
+      this.lastPublicVoteAgo = 'Mamo problem, tega podatka ne ratamo dobit ?';
+    }
+
     this.imageBaseUrl = `${http.defaults.baseURL}contestants/`;
     this.results.rawData = (await http.get('/results'))?.data ?? [];
     this.processVotes();
+
+    this.$nextTick( () => {
+      this.$forceUpdate();
+      this.$nextTick( () => {
+        this.activeRefresh = false;
+        this.$forceUpdate();
+      })
+    });
   }
 
   processVotes() {
@@ -220,6 +310,16 @@ export default class AdminComponent extends Vue {
 
     this.results.combined = combinedResult;
   }
+
+  async resetVoting() {
+    await http.post('/reset/voting', {}, { headers: {authorization: 'jakikaki'}});
+    this.reloadContestants();
+  }
+
+  async resetContestants() {
+    await http.post('/reset/contestants', {}, { headers: {authorization: 'jakikaki'}});
+    this.reloadContestants();
+  }
 }
 </script>
 
@@ -267,6 +367,24 @@ $thirdPlaceBronze: rgb(172, 117, 66);
   z-index: 1;
 }
 
+.refresh-line {
+  width: 100%;
+  height: 0.25rem;
+
+  .refresh-line-bar {
+    width: 1px;
+    height: 100%;
+    background-color: #fa6;
+
+    transition: width 15s linear;
+  }
+  .reset {
+    height: 100%;
+    background-color: #fa6;
+    width: 99%;
+  }
+}
+
 .admin-panel-row {
   justify-content: flex-end;
 }
@@ -280,6 +398,16 @@ $thirdPlaceBronze: rgb(172, 117, 66);
   padding: 1rem;
   background-color: rgba(0,0,0,0.69);
   backdrop-filter: blur(5px) saturate(0.5);
+}
+
+.tie {
+  &.segment {
+    background-color: rgba(49, 39, 114, 0.69);
+  }
+  &.master {
+    background-color: #fa6;
+    color: #000;
+  }
 }
 
 .ml-4 {
@@ -296,6 +424,8 @@ $thirdPlaceBronze: rgb(172, 117, 66);
     position: relative;
     aspect-ratio: 2/3;
     margin: 2rem;
+
+    box-shadow: 1rem 1rem 2rem rgba(0, 0, 0, 0.69);
 
     .image-container {
       width: 100%;

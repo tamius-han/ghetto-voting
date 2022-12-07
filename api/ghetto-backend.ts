@@ -11,6 +11,8 @@ export class GhettoBackend {
   voteCandidates: VoteCandidate[] = [];
   processedVoteCandidates: {[x: number]: VoteCandidate} = {};
   voters: string[] = [];
+  voteStart: Date = new Date();
+  lastPublicVoteTime?: number;
 
   ghettoConf = {
     publicVoteWeight: 1,
@@ -25,7 +27,16 @@ export class GhettoBackend {
 
     fs.ensureDirSync('data');
     if (fs.existsSync('data/voter-list.json')) {
-      this.voters = JSON.parse(fs.readFileSync('data/voter-list.json', 'utf8'));
+      const {voters, start} = JSON.parse(fs.readFileSync('data/voter-list.json', 'utf8'));
+
+      if (!voters || !start) {
+        this.resetVoting();
+      } else {
+        this.voters = voters;
+        this.voteStart = start;
+      }
+
+      // JSON.parse(fs.readFileSync('data/voter-list.json', 'utf8'));
     }
     if (fs.existsSync('data/votes.json')) {
       this.voteRecords = new Map(
@@ -58,6 +69,32 @@ export class GhettoBackend {
     }
   }
 
+  // resets vote counts _and_ voter list
+  resetVoting() {
+    this.voters = [];
+    this.voteStart = new Date();
+    this.lastPublicVoteTime = undefined;
+
+    fs.writeFileSync('data/voter-list.json', JSON.stringify({
+      voters: this.voters,
+      voteStart: this.voteStart
+    }));
+
+    this.voteRecords = new Map();
+    fs.writeFileSync(
+      'data/votes.json',
+      JSON.stringify(
+        Object.fromEntries(this.voteRecords)
+      )
+    );
+  }
+
+  getVoteStart() {
+    return {
+      voteStart: +this.voteStart
+    }
+  }
+
   /**
    * Generates random and unique ID
    * @returns
@@ -75,6 +112,7 @@ export class GhettoBackend {
       // update and save voter list
       this.voters.push(idCandidate);
       fs.writeFileSync('data/voter-list.json', JSON.stringify(this.voters));
+      console.log('new voter ID requested:', idCandidate);
       return idCandidate;
     }
   }
@@ -115,13 +153,15 @@ export class GhettoBackend {
    * @param vote
    */
   setPublicVote(voterId: string, vote: Vote[]): void {
-    // if (!this.voters.includes(voterId)) {
-    //   throw new Error('NAUGHTY!');
-    // }
+    if (!this.voters.includes(voterId)) {
+      console.warn('User is not on the voter ID list. This means user\'s frontend may be out of date — we will return an error. Frontend should reset and request new ID.');
+      throw new Error('NAUGHTY!');
+    }
     if (!this.voteValidatorService.validateVote(vote)) {
       throw new Error('INVALID_VOTE');
     }
 
+    this.lastPublicVoteTime = +new Date();
     this.voteRecords.set(voterId, {voterId, votes: vote});
   }
 
@@ -151,8 +191,12 @@ export class GhettoBackend {
         }
 
         // filter out cheeky twats
-        if (this.processedVoteCandidates[+vote.candidateId]) {
-          this.processedVoteCandidates[+vote.candidateId].votes! += vote.points;
+        if (this.processedVoteCandidates[+vote.candidateId] !== undefined) {
+          if (this.processedVoteCandidates[+vote.candidateId].votes !== undefined) {
+            this.processedVoteCandidates[+vote.candidateId].votes! += vote.points;
+          } else {
+            this.processedVoteCandidates[+vote.candidateId].votes = 0;
+          }
         }
       }
     }
@@ -176,6 +220,25 @@ export class GhettoBackend {
     }
     // sort on frontend pls
     return candidateArray;
+  }
+
+  resetVoteCandidates() {
+    // remove all images
+    try {
+      for (let i = 0; i < this.voteCandidates.length; i++) {
+        if (fs.existsSync(`data/images/${i}.webp`)) {
+          fs.removeSync(`data/images/${i}.webp`);
+          console.log(`removed data/images/${i}.webp`);
+        }
+      }
+      console.log('images removed.');
+    } catch (e) {
+      console.error('failed to remove images.');
+    }
+
+    this.voteCandidates = [];
+    this.saveContestants();
+    this.reloadContestEntries();
   }
 
   getContestants() {
@@ -217,6 +280,9 @@ export class GhettoBackend {
   }
 
   deleteContestant(contestantId: number) {
+    // delete image
+    fs.removeSync(`data/images/${contestantId}.webp`);
+
     // correct contestant images, because removing contestant will change IDs
     for (let i = contestantId + 1; i < this.voteCandidates.length; i++) {
       if (fs.existsSync(`data/images/${i}.webp`)) {

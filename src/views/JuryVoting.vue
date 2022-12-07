@@ -86,7 +86,7 @@ import http from '@/http-common';
 })
 export default class JuryVotingComponent extends Vue {
   password = '';
-  passwordPhase = 2;
+  passwordPhase = 0;
 
   jurySize = 3;
   juryMembers = ['A', 'B', 'C'];

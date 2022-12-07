@@ -25,7 +25,13 @@
     <div class="vote-container d-flex flex-column flex-md-row flex-md-wrap justify-content-center align-items-center">
       <div v-if="!contestants">Nalaganje ...</div>
       <div v-else-if="contestants && contestants.length === 0">
-        Malo prezgodej za glasovanje, eh?
+        <h2>Malo prezgodej za glasovanje, eh?</h2>
+        <p>Če vidiš to sporočilo, potem sta možni dve stvari:</p>
+        <p>1. Ni še tekmovalcev. Iščejo se še tekmovalci.</p>
+        <p>2. Backend ne lavfa. Zaderi se "joža, požen!"</p>
+        <p>Za namene administracije: <a href="/prijava">vnos prijav</a></p>
+
+
       </div>
       <template v-else>
         <div
@@ -141,7 +147,11 @@ export default class VotingComponent extends Vue {
   myVotes: Vote[] = [];
   activeContestantVoteMenu?: number = -1;
 
-  async created() {
+  created() {
+    this.setupVoting();
+  }
+
+  private async setupVoting() {
     await this.getId();
     this.imageBaseUrl = `${http.defaults.baseURL}contestants/`;
     await this.listContestants();  // must be loaded _before_ user's current votes load
@@ -150,17 +160,36 @@ export default class VotingComponent extends Vue {
   }
 
   private async getId() {
+    const startTimeObjStr = localStorage.getItem('voteStartTime');
+    let resetId = true;
+
+    if (startTimeObjStr) {
+      const voteStart = JSON.parse(startTimeObjStr).startTime;
+
+      const res = await http.get('/vote-start');
+
+      if (voteStart === res.data.voteStart) {
+        resetId = false;
+      }
+    }
+
+
     const localStorageId = localStorage.getItem('clientId');
-    if (localStorageId) {
+
+    if (localStorageId && !resetId) {
       http.defaults.headers.common['Authorization'] = localStorageId;
       return localStorageId;
     }
 
-    const res = await http.get(`/voter-id`);
-    http.defaults.headers.common['Authorization'] = res.data.id;
-    localStorage.setItem('clientId', res.data.id);
-    return res.data.id;
+    if (resetId) {
+      const res = await http.get(`/voter-id`);
+      http.defaults.headers.common['Authorization'] = res.data.id;
+      localStorage.setItem('clientId', res.data.id);
+      localStorage.setItem('voteStartTime', JSON.stringify({startTime: res.data.voteStart}))
+      return res.data.id;
+    }
   }
+
   private async getVoteConfig() {
     const res = await http.get('/vote-config');
     console.log('ote config:', res.data);
@@ -208,7 +237,7 @@ export default class VotingComponent extends Vue {
     }
   }
 
-  async voteFor(contestantIndex: number, points: number): Promise<void> {
+  async voteFor(contestantIndex: number, points: number, recursing = false): Promise<void> {
     // find if we already voted for this user
     if (this.contestants[contestantIndex].myPoints) {
       const v = this.currentAvailableVotesLeft.find(x => x.points === this.contestants[contestantIndex].myPoints);
@@ -253,8 +282,27 @@ export default class VotingComponent extends Vue {
     this.contestants[contestantIndex].myPoints = points;
 
     // update backend. Validating whether user voted at appropriate should be done on the backend.
-    await http.post('vote', {votes: this.myVotes});
-    console.log('voted for', contestantIndex, 'gave them', points, 'points');
+    try {
+      await http.post('/vote', {votes: this.myVotes});
+      console.log('voted for', contestantIndex, 'gave them', points, 'points');
+    } catch (e) {
+      console.error('proble with voting. voting probably restarted. Reseting our ID and recasting vote');
+      console.error('error:', e);
+
+      await this.setupVoting();
+
+      try {
+        if (!recursing) {
+          this.voteFor(contestantIndex, points, true);
+          console.log('second attempt — voted for', contestantIndex, 'gave them', points, 'points');
+        } else {
+          console.warn('we are recursing too deep, quitting!')
+        }
+      } catch (e) {
+        console.error('Problem with voting persists.');
+        console.error('error:', e);
+      }
+    }
   }
 }
 </script>
