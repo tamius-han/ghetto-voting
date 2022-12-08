@@ -274,8 +274,8 @@ export class GhettoBackend {
   }
 
   addContestantImage(contestantId: number, image: any) {
-    console.log('adding contestant image. data:', image, image.data);
-    sharp(image.data)
+    console.log('adding contestant image. data:');
+    return sharp(image.data)
       .resize(1080)
       .webp({
         quality: 80,

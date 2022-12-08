@@ -71,13 +71,13 @@ export class Main {
       res.send(backend.deleteContestant(+req.params.id));
     });
 
-    app.post('/contestants/:id/image', (req, res)=> {
+    app.post('/contestants/:id/image', async (req, res)=> {
       console.log('↘↘ updating image for contestant', req.params.id, ' — file:', req.files);
 
       if (!req.files) {
         return res.send({status: 400});
       }
-      res.send(backend.addContestantImage(+req.params.id, req.files.image ?? req.files.file));
+      res.send(await backend.addContestantImage(+req.params.id, req.files.image ?? req.files.file));
     });
 
     app.get('/my-votes', (req, res) => {
