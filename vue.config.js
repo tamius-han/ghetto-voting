@@ -1,3 +1,4 @@
 module.exports = {
-  outputDir: "dist-app"
+  outputDir: "dist-app",
+  productionSourceMap: false,
 }

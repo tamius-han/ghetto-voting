@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { VoteCandidate } from './../common/types/vote-candidate.interface';
 import { Vote, VoteRecord } from '../common/types/vote-record.interface';
 import { VoteValidator } from './vote-validator';
@@ -75,6 +76,7 @@ export class GhettoBackend {
   }
 
   // resets vote counts _and_ voter list
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   resetVoting() {
     this.voters = [];
     this.voteStart = new Date();
@@ -94,6 +96,7 @@ export class GhettoBackend {
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   getVoteCount() {
     const voters = this.voters.length;
     const submittedVoteCount = this.getJuryVote() ? this.voteRecords.size - 1 : this.voteRecords.size;
@@ -115,6 +118,7 @@ export class GhettoBackend {
    * @returns
    */
   generateVoterId() {
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       const idCandidate = (Math.random() + 1).toString(36);
       if (idCandidate === 'jury') {

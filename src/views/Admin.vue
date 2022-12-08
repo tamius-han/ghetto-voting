@@ -105,7 +105,7 @@
         <div class="panel">
           <h3>Skupni seštevek</h3>
 
-          <div>
+          <div v-if="results.combined">
             <div
               v-for="(contestant, index) of results.combined"
               :key="contestant.id"
@@ -129,7 +129,7 @@
         <div class="panel">
           <h3>Glas publike</h3>
 
-          <div>
+          <div v-if="results.public">
             <div
               v-for="(contestant, index) of results.public"
               :key="contestant.id"
@@ -150,7 +150,7 @@
         <div class="panel">
           <h3>Glas žirije</h3>
 
-          <div>
+          <div v-if="results.jury">
             <div
               v-for="(contestant, index) of results.jury"
               :key="contestant.id"
@@ -282,6 +282,7 @@ export default class AdminComponent extends Vue {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   processVotes() {
     // sort by votes
     const sortedPublic = JSON.parse(JSON.stringify(this.results.rawData)).sort((a: any,b: any) => {
@@ -344,17 +345,20 @@ export default class AdminComponent extends Vue {
     this.results.combined = combinedResult;
   }
 
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   async resetVoting() {
     await http.post('/reset/voting', {}, { headers: {authorization: 'jakikaki'}});
     this.reloadContestants();
   }
 
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   async resetContestants() {
     await http.post('/reset/contestants', {}, { headers: {authorization: 'jakikaki'}});
     this.reloadContestants();
   }
 
   // does a stress test on the backend.
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   runLoadTest() {
     console.log('ATTEMPTING TO RUN LOAD TEST! —————————————————————');
     this.loadSimulatorConf.inProgress = true;
@@ -481,6 +485,7 @@ export default class AdminComponent extends Vue {
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   stopLoadTest() {
     console.warn('Starting to halt active load tests (if any)');
     this.loadSimulatorConf.inProgress = false;
