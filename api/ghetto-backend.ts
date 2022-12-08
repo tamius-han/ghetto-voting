@@ -276,6 +276,7 @@ export class GhettoBackend {
   addContestantImage(contestantId: number, image: any) {
     console.log('adding contestant image. data:');
     return sharp(image.data)
+      .rotate()         // needed for exif
       .resize(1080)
       .webp({
         quality: 80,
