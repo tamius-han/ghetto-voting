@@ -26,7 +26,9 @@ export class GhettoBackend {
     this.reloadContestEntries();
 
     fs.ensureDirSync('data');
+    fs.ensureDirSync('data/images');
     fs.ensureDirSync('conf');
+
     if (fs.existsSync('data/voter-list.json')) {
       const {voters, start} = JSON.parse(fs.readFileSync('data/voter-list.json', 'utf8'));
 
