@@ -41,12 +41,14 @@ npm run run-backend
 
 ### Za deploy
 
+Oboje je na node 14 (obstaja nvmrc). Ne pozabit `npm i` narest.
+
 #### App:
 ```
 npm run build
 ```
 
-Stvari se pojavijo v `/dist-app`. To gre na nginx/apache/whatever se uporablja za web server. Pomembno je, da ima voting app svojo poddomeno, in da **ni kje drugje v kakšnem subdirektoriju** ker vue ni tko skonfiguriran. 
+Stvari se pojavijo v `/dist-app`. To gre na nginx/apache/whatever se uporablja za web server. Pomembno je, da ima voting app svojo poddomeno, in da **ni kje drugje v kakšnem subdirektoriju** ker vue ni tko skonfiguriran 
 
 #### Api
 
