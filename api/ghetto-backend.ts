@@ -94,6 +94,16 @@ export class GhettoBackend {
     );
   }
 
+  getVoteCount() {
+    const voters = this.voters.length;
+    const submittedVoteCount = this.getJuryVote() ? this.voteRecords.size - 1 : this.voteRecords.size;
+
+    return {
+      voters: voters,
+      submittedVotes: submittedVoteCount
+    };
+  }
+
   getVoteStart() {
     return {
       voteStart: +this.voteStart

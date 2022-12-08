@@ -16,6 +16,9 @@ export class Main {
     app.use(fileUpload());
     app.use(cors());
 
+    app.get('/ballot-count', (req, res) => {
+      res.send(backend.getVoteCount());
+    })
 
     app.get('/vote-start', (req, res) => {
       res.send({
@@ -104,10 +107,6 @@ export class Main {
       res.send(backend.setJuryVote(req.body.votes));
     })
 
-    app.listen(port, () => {
-      return console.log('haha voting machine go brrr');
-    });
-
     app.post('/reset/voting', jsonParser, (req, res) => {
       if (req.headers.authorization === 'jakikaki') {
         res.send(backend.resetVoting());
@@ -122,6 +121,11 @@ export class Main {
       } else {
         res.send({status: 403});
       }
+    });
+
+
+    app.listen(port, () => {
+      return console.log('haha voting machine go brrr');
     });
 
   }

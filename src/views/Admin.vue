@@ -36,7 +36,9 @@
               <div class="" :class="{'reset': activeRefresh, 'refresh-line-bar': !activeRefresh}"></div>
             </div>
             <template v-if="lastPublicVoteAgo">
-              Čas od zadnjega glasu: {{lastPublicVoteAgo}}
+              Čas od zadnjega glasu: {{lastPublicVoteAgo}}<br/>
+              Volilnih upravičencev: {{voteStatistics.voters}}<br/>
+              Oddanih glasovnic: {{voteStatistics.submittedVotes}}<br/>&nbsp;
             </template>
           </div>
 
@@ -45,6 +47,15 @@
             <div class="button" @click="resetVoting()">Resetiraj glasovanje</div>
           </div>
           <div></div>
+          <div><br/><br/>Prekomerno obremeni backend:</div>
+          <p>Hkratnih glasovanj na batch: <input v-model="loadSimulatorConf.batchSize"></p>
+          <p>Hkratnih batch-ev: <input v-model="loadSimulatorConf.concurrentBatches"></p>
+          <p>Skupaj batchev: <input v-model="loadSimulatorConf.totalBatches"></p>
+          <p>Hkratnih zahtevkov: {{(loadSimulatorConf.batchSize * loadSimulatorConf.concurrentBatches)}}; vseh simuliranih glasov: {{(loadSimulatorConf.batchSize * loadSimulatorConf.totalBatches)}}</p>
+          <div class="d-flex flex-row">
+            <div class="button red" @click="runLoadTest()">Stress test</div>
+            <div class="button" @click="stopLoadTest()">Stop load test</div>
+          </div>
         </div>
 
         <div class="panel">
@@ -164,6 +175,7 @@
 import { Options, Vue } from 'vue-class-component';
 import HelloWorld from '@/components/HelloWorld.vue'; // @ is an alias to /src
 import http from '@/http-common';
+import axios from 'axios';
 
 @Options({
 
@@ -172,6 +184,7 @@ export default class AdminComponent extends Vue {
   imageBaseUrl = '';
   passwordPhase = 0;
   password = '';
+  stressTestInProgress = false;
 
   results: {
     rawData: any[],
@@ -189,7 +202,18 @@ export default class AdminComponent extends Vue {
   chuckNorrisVotes = [];
   juryPrecedence = 0;    // jury's intermediateScoresArray is by this much bigger than
   lastPublicVoteAgo?: string = '';
+  voteStatistics = {
+    voters: '0',
+    submittedVotes: '0'
+  }
   activeRefresh = false;
+
+  loadSimulatorConf = {
+    inProgress: false,
+    batchSize: 8,
+    concurrentBatches: 4,
+    totalBatches: 64
+  };
 
   created() {
     this.reloadContestants();
@@ -232,8 +256,17 @@ export default class AdminComponent extends Vue {
         this.lastPublicVoteAgo = '';
       }
     } catch (e) {
-      console.warn('could not get last public vote time.')
+      console.warn('could not get last public vote time.');
       this.lastPublicVoteAgo = 'Mamo problem, tega podatka ne ratamo dobit ?';
+    }
+    try {
+      this.voteStatistics = (await http.get('/ballot-count'))?.data;
+    } catch (e) {
+      console.warn('could not get last public ballot count');
+      this.voteStatistics = {
+        voters: 'uh, problem?',
+        submittedVotes: 'tud problem'
+      }
     }
 
     this.imageBaseUrl = `${http.defaults.baseURL}contestants/`;
@@ -319,6 +352,138 @@ export default class AdminComponent extends Vue {
   async resetContestants() {
     await http.post('/reset/contestants', {}, { headers: {authorization: 'jakikaki'}});
     this.reloadContestants();
+  }
+
+  // does a stress test on the backend.
+  runLoadTest() {
+    console.log('ATTEMPTING TO RUN LOAD TEST! —————————————————————');
+    this.loadSimulatorConf.inProgress = true;
+    const apiBase = 'http://api-vote.amulet.tamius.net';
+    const appBase = 'http://vote.amulet.tamius.net';
+    const baseHeaders = {
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    };
+
+    const loadPageFn = async () => {
+      if (!this.loadSimulatorConf.inProgress) {
+        console.info(`[loadPageFn] stress test has been stopped. Will not perform vote simulation.`)
+        return;
+      }
+      try {
+        await Promise.all([
+           axios.get(`${appBase}/`),
+           axios.get(`http://vote.amulet.tamius.net/css/app.30cb89e9.css`),
+           axios.get(`http://vote.amulet.tamius.net/css/chunk-vendors.df627968.css`),
+           axios.get(`http://vote.amulet.tamius.net/js/app.b94470cc.js`),
+           axios.get(`http://vote.amulet.tamius.net/js/chunk-vendors.e82a8fa1.js`),
+           axios.get(`http://vote.amulet.tamius.net/fonts/josefinsans.c83bb729.ttf`)
+        ]);
+      } catch (e) {
+        console.warn('Failed to load voting page:', e);
+        return;
+      }
+
+      try {
+        await axios.get(`${apiBase}/vote-start`,  {headers: baseHeaders});
+        const {id} = (await axios.get(`${apiBase}/voter-id?ts=${+Date.now()}${Math.random()}`,  {headers: baseHeaders})).data;
+        await axios.get(`${apiBase}/vote-config`, {headers: baseHeaders});
+        await axios.get(`${apiBase}/my-votes`, {headers: {...baseHeaders, 'Authorization': id}});
+
+        await axios.get(`${apiBase}/contestants`,  {headers: baseHeaders});
+
+        try {
+          const images = [];
+          for (let i = 0; i < 7; i++) {
+            images.push(
+              axios.get(`${apiBase}/contestants/${i}/image`,  {headers: baseHeaders})
+            );
+          }
+          await Promise.all(images);
+        } catch (e) {
+          console.warn('Failed to load images.');
+        }
+
+        const pickedCandidates: number[] = [];
+        const votes = [];
+
+        while (pickedCandidates.length < 3) {
+          const randomCandidate = Math.floor(Math.random() * 7);
+          if (pickedCandidates.includes(randomCandidate))
+            continue;
+
+          pickedCandidates.push(randomCandidate);
+          votes.push({
+            candidateId: randomCandidate,
+            points: pickedCandidates.length
+          });
+        }
+
+        try {
+          await axios.post(`${apiBase}/vote`, {votes: votes}, {headers: {'Authorization': id}});
+
+          // verify votes were cast correctly
+          const res = await axios.get(`${apiBase}/my-votes`, {headers: {...baseHeaders, 'Authorization': id}});
+          for (const vote of votes) {
+            if (!res.data.votes.find((x: any) => x.candidateId === vote.candidateId)) {
+              console.error('There was a problem with voting. Our votes:', votes, 'our votes as returned by backend:', res.data);
+              break;
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to cast vote!');
+        }
+      } catch (e) {
+        console.warn('failed to initiate vote config.');
+        return;
+      }
+    }
+
+    const createBatch = async (batchSize: number) => {
+      if (!this.loadSimulatorConf.inProgress) {
+        console.info(`[createBatch] stress test has been stopped. Will not perform vote simulation.`)
+        return;
+      }
+      console.info('Creating new batch of size', batchSize);
+      const promises = [];
+      for (let i = 0; i < batchSize; i++) {
+        promises.push(
+          loadPageFn()
+        )
+      }
+      await Promise.all(promises);
+    }
+
+    const runParallelBatches = async (batchSize: number, parallelBatches: number, totalBatches: number)  => {
+      let processedBatches = 0;
+      while (processedBatches < totalBatches) {
+        if (!this.loadSimulatorConf.inProgress) {
+          console.info(`[loadPageFn] stress test has been stopped. Will not perform vote simulation.`)
+          return;
+        }
+        const promises = [];
+        for (let i = 0; i < parallelBatches; i++) {
+          promises.push(
+            await createBatch(batchSize)
+          )
+        }
+        await Promise.all(promises);
+        processedBatches += parallelBatches;
+        console.info('Processed', processedBatches, 'out of', totalBatches);
+      }
+    }
+
+    runParallelBatches(
+      this.loadSimulatorConf.batchSize,
+      this.loadSimulatorConf.concurrentBatches,
+      this.loadSimulatorConf.totalBatches
+    );
+  }
+
+  stopLoadTest() {
+    console.warn('Starting to halt active load tests (if any)');
+    this.loadSimulatorConf.inProgress = false;
   }
 }
 </script>
