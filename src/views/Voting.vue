@@ -257,7 +257,7 @@ export default class VotingComponent extends Vue {
 
   async voteFor(contestantIndex: number, points: number, recursing = false): Promise<void> {
     this.backendError = false;
-    if (this.contestants) {
+    if (!this.contestants) {
       return;
     }
 
