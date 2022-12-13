@@ -47,15 +47,18 @@
             <div class="button" @click="resetVoting()">Resetiraj glasovanje</div>
           </div>
           <div></div>
-          <div><br/><br/>Prekomerno obremeni backend:</div>
-          <p>Hkratnih glasovanj na batch: <input v-model="loadSimulatorConf.batchSize"></p>
-          <p>Hkratnih batch-ev: <input v-model="loadSimulatorConf.concurrentBatches"></p>
-          <p>Skupaj batchev: <input v-model="loadSimulatorConf.totalBatches"></p>
-          <p>Hkratnih zahtevkov: {{(loadSimulatorConf.batchSize * loadSimulatorConf.concurrentBatches)}}; vseh simuliranih glasov: {{(loadSimulatorConf.batchSize * loadSimulatorConf.totalBatches)}}</p>
-          <div class="d-flex flex-row">
-            <div class="button red" @click="runLoadTest()">Stress test</div>
-            <div class="button" @click="stopLoadTest()">Stop load test</div>
-          </div>
+          <a @click="showLoadTesting = !showLoadTesting">Skrij/pokaži možnosti testiranja obremenitve</a>
+          <template v-if="showLoadTesting">
+            <div><br/><br/>Prekomerno obremeni backend:</div>
+            <p>Hkratnih glasovanj na batch: <input v-model="loadSimulatorConf.batchSize"></p>
+            <p>Hkratnih batch-ev: <input v-model="loadSimulatorConf.concurrentBatches"></p>
+            <p>Skupaj batchev: <input v-model="loadSimulatorConf.totalBatches"></p>
+            <p>Hkratnih zahtevkov: {{(loadSimulatorConf.batchSize * loadSimulatorConf.concurrentBatches)}}; vseh simuliranih glasov: {{(loadSimulatorConf.batchSize * loadSimulatorConf.totalBatches)}}</p>
+            <div class="d-flex flex-row">
+              <div class="button red" @click="runLoadTest()">Stress test</div>
+              <div class="button" @click="stopLoadTest()">Stop load test</div>
+            </div>
+          </template>
         </div>
 
         <div class="panel">
@@ -214,6 +217,8 @@ export default class AdminComponent extends Vue {
     concurrentBatches: 4,
     totalBatches: 64
   };
+
+  showLoadTesting = false;
 
   created() {
     this.reloadContestants();
