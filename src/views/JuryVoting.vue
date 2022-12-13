@@ -41,7 +41,7 @@
           class="contestant-option d-flex flex-row"
         >
           <div class="image-container position-relative">
-            <img class="contestant-image" :src="imageBaseUrl + contestant.id + '/image'" loading="lazy" alt="&nbsp;"/>
+            <img class="contestant-image" :src="(imageBaseUrl + contestant.id + '/image?gci' + contestant.imageUpdate)" loading="lazy" alt="&nbsp;"/>
           </div>
           <div class="contestant-description-votes d-flex flex-column">
             <h1>{{(index + 1)}}. {{contestant.title}}</h1>

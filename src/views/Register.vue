@@ -10,7 +10,7 @@
       <div v-if="contestants.length">
         <div v-for="contestant, index of contestants" :key="contestant" class="d-flex flex-row contestant-row">
           <div v-if="!forceImageReload" class="image-container position-relative">
-            <img class="contestant-image-placeholder" :src="imageBaseUrl + contestant.id + '/image'" loading="lazy" alt="&nbsp;"/>
+            <img class="contestant-image-placeholder" :src="(imageBaseUrl + contestant.id + '/image?gci=' + contestant.imageUpdate)" loading="lazy" alt="&nbsp;"/>
           </div>
           <div>
           <div class="contestant-name-display">
@@ -156,7 +156,6 @@ export default class RegisterComponent extends Vue {
         '/contestants/register',
         this.newContestant
       )
-
       this.cancelAddEdit();
     } catch (e) {
       this.submitting = false;

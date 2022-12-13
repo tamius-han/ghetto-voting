@@ -41,7 +41,7 @@
           @click.stop="setActiveContestant(index)"
         >
           <div class="image-container position-relative">
-            <img class="contestant-image" :src="imageBaseUrl + contestant.id + '/image'" loading="lazy" alt="&nbsp;"/>
+            <img class="contestant-image" :src="(imageBaseUrl + contestant.id + '/image?gci=' + contestant.imageUpdate)" loading="lazy" alt="&nbsp;"/>
           </div>
 
           <div
