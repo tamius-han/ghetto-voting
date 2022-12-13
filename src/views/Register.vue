@@ -240,6 +240,7 @@ export default class RegisterComponent extends Vue {
         this.forceImageReload = true;
 
         this.$nextTick(()=> {
+          this.contestants[contestantId].imageUpdate = +new Date();
           this.forceImageReload = false;
         });
       })
