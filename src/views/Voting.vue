@@ -139,7 +139,7 @@ import { Vote } from 'common/types/vote-record.interface';
   },
 })
 export default class VotingComponent extends Vue {
-  contestants: any[] = [];
+  contestants?: any[] | undefined | null = null;
   imageBaseUrl?: string;
   totalVotes: any[] = [];
   availableVotes: any[] = [];
@@ -201,7 +201,7 @@ export default class VotingComponent extends Vue {
     console.log('my votes:', res.data);
     this.myVotes = res.data.votes;
 
-    for (const contestant of this.contestants) {
+    for (const contestant of this.contestants || []) {
       contestant.myPoints = this.myVotes.find(x => x.candidateId === contestant.id)?.points ?? undefined;
     }
     for (const vote of this.myVotes) {
@@ -238,20 +238,24 @@ export default class VotingComponent extends Vue {
   }
 
   async voteFor(contestantIndex: number, points: number, recursing = false): Promise<void> {
+    if (this.contestants) {
+      return;
+    }
+
     // find if we already voted for this user
-    if (this.contestants[contestantIndex].myPoints) {
-      const v = this.currentAvailableVotesLeft.find(x => x.points === this.contestants[contestantIndex].myPoints);
+    if (this.contestants![contestantIndex].myPoints) {
+      const v = this.currentAvailableVotesLeft.find(x => x.points === this.contestants![contestantIndex].myPoints);
       if (v) {
         v.instances++;
       } else {
-        this.currentAvailableVotesLeft.push({points: this.contestants[contestantIndex].myPoints, instances: 1});
+        this.currentAvailableVotesLeft.push({points: this.contestants![contestantIndex].myPoints, instances: 1});
       }
 
-      const isRevoke = this.contestants[contestantIndex].myPoints === points;
+      const isRevoke = this.contestants![contestantIndex].myPoints === points;
 
       // revoke from myVotes
-      this.myVotes = this.myVotes.filter(x => x.candidateId !== this.contestants[contestantIndex].id);
-      this.contestants[contestantIndex].myPoints = undefined;
+      this.myVotes = this.myVotes.filter(x => x.candidateId !== this.contestants![contestantIndex].id);
+      this.contestants![contestantIndex].myPoints = undefined;
 
       // if we're revoking rather than changing the vote, we're done here
       if (isRevoke) {
@@ -265,7 +269,7 @@ export default class VotingComponent extends Vue {
       console.log('no available votes with this pint value > clearing existing votes');
       // remove existing votes for this score
       this.myVotes = this.myVotes.filter(x => x.points !== points);
-      this.contestants = this.contestants.map(x => ({
+      this.contestants = this.contestants!.map(x => ({
         ...x,
         myPoints: x.myPoints === points ? 0 : x.myPoints
       }));
@@ -278,8 +282,8 @@ export default class VotingComponent extends Vue {
 
     this.decreaseAvailableVotes(points);
 
-    this.myVotes.push({candidateId: this.contestants[contestantIndex].id, points: points});
-    this.contestants[contestantIndex].myPoints = points;
+    this.myVotes.push({candidateId: this.contestants![contestantIndex].id, points: points});
+    this.contestants![contestantIndex].myPoints = points;
 
     // update backend. Validating whether user voted at appropriate should be done on the backend.
     try {
