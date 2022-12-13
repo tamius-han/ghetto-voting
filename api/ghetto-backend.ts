@@ -39,8 +39,6 @@ export class GhettoBackend {
         this.voters = voters;
         this.voteStart = start;
       }
-
-      // JSON.parse(fs.readFileSync('data/voter-list.json', 'utf8'));
     }
     if (fs.existsSync('data/votes.json')) {
       this.voteRecords = new Map(
@@ -54,6 +52,7 @@ export class GhettoBackend {
 
     // save votes every 30 seconds
     setInterval(() => {
+      console.log('writing vote data to file!');
       fs.writeFileSync(
         'data/votes.json',
         JSON.stringify(
@@ -82,10 +81,7 @@ export class GhettoBackend {
     this.voteStart = new Date();
     this.lastPublicVoteTime = undefined;
 
-    fs.writeFileSync('data/voter-list.json', JSON.stringify({
-      voters: this.voters,
-      voteStart: this.voteStart
-    }));
+    this.saveVoters();
 
     this.voteRecords = new Map();
     fs.writeFileSync(
@@ -130,7 +126,7 @@ export class GhettoBackend {
 
       // update and save voter list
       this.voters.push(idCandidate);
-      fs.writeFileSync('data/voter-list.json', JSON.stringify(this.voters));
+      this.saveVoters();
       console.log('new voter ID requested:', idCandidate);
       return idCandidate;
     }
@@ -266,6 +262,15 @@ export class GhettoBackend {
 
   private saveContestants() {
     fs.writeFileSync('conf/contest-entries.conf.json', JSON.stringify(this.voteCandidates));
+  }
+  private saveVoters() {
+    fs.writeFileSync(
+      'data/voter-list.json',
+      JSON.stringify({
+        voters: this.voters,
+        start: this.voteStart
+      })
+    );
   }
 
   addContestant(contestantData: VoteCandidate) {
