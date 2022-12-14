@@ -1,0 +1,49 @@
+networks:
+  public:
+  private:
+  default:
+
+services:
+
+  ################################################################################
+  # Traefik | Reverse Proxy
+  ################################################################################
+  traefik:
+    image: 'traefik:${TRAEFIK_VERSION_TAG}'
+    command:
+      - '--log.level=DEBUG'
+      # Enable dashboard
+      - '--api.insecure=true'
+      - '--api.dashboard=true'
+      # Docker configuration
+      - '--providers.docker=true'
+      - '--providers.docker.exposedbydefault=false'
+      - '--providers.docker.network=private'
+      # Configure entrypoint
+      - '--entrypoints.http.address=:80'
+    networks:
+      - 'public'
+      - 'private'
+    ports:
+      - '80:80'
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock:ro'
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.traefik.rule=Host(`prx.${PROJECT_BASE_URL}`)'
+      - 'traefik.http.routers.traefik.service=api@internal'
+
+  ################################################################################
+  # Frontend | 
+  ################################################################################
+  client:
+    image: 'druzabni/client:local'
+    build:
+      dockerfile: docker-images/client/Dockerfile.prd
+      args:
+        - ARG_BASE_IMAGE_DEV_VERSIOM=local
+    networks:
+      - 'private'
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.client.rule=Host(`${PROJECT_BASE_URL}`)'

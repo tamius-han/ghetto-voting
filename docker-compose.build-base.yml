@@ -1,0 +1,10 @@
+services:
+
+  client-base:
+    image: 'druzabni/client-base:local'
+    build:
+      context: docker-images/client-base
+      dockerfile: Dockerfile
+      args:
+        - ARG_NODE_VERSION=14.18.1-alpine3.12
+        - ARG_OMZSHD_VERSION=1.1.2

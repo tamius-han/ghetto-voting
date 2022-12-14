@@ -1,0 +1,36 @@
+###############################################################################
+#--------------------------    DEVELOPMENT STAGE   ---------------------------#
+###############################################################################
+
+#-----------------------------------------------------------------------------#
+# Pull and rename base image
+ARG ARG_BASE_IMAGE_DEV_VERSIOM
+FROM druzabni/client-base:$ARG_BASE_IMAGE_DEV_VERSIOM AS dev
+
+#-----------------------------------------------------------------------------#
+# Build develop image
+FROM dev AS final
+
+COPY . ./
+RUN set -ex \
+    # print npm and node version
+    && npm -v \
+    && node -v \
+    # Create node_modules folder
+    && mkdir node_modules \
+    # install dependency packages
+    && npm install --development \
+    # build project
+    && npm run build --fail-on-error --production \
+    # print location and content of it
+    && pwd \
+    && ls -lah
+
+ENTRYPOINT ["/sbin/tini", "--"]
+EXPOSE 3000
+CMD ["npm", "run", "preview", "--production", "--port", "3000"]
+
+FROM nginx:stable-alpine AS nginx
+COPY --from=final /workspace/dist-app /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
