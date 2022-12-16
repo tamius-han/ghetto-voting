@@ -39,8 +39,6 @@ export class GhettoBackend {
         this.voters = voters;
         this.voteStart = start;
       }
-
-      // JSON.parse(fs.readFileSync('data/voter-list.json', 'utf8'));
     }
     if (fs.existsSync('data/votes.json')) {
       this.voteRecords = new Map(
@@ -54,6 +52,7 @@ export class GhettoBackend {
 
     // save votes every 30 seconds
     setInterval(() => {
+      console.log('writing vote data to file!');
       fs.writeFileSync(
         'data/votes.json',
         JSON.stringify(
@@ -82,10 +81,7 @@ export class GhettoBackend {
     this.voteStart = new Date();
     this.lastPublicVoteTime = undefined;
 
-    fs.writeFileSync('data/voter-list.json', JSON.stringify({
-      voters: this.voters,
-      voteStart: this.voteStart
-    }));
+    this.saveVoters();
 
     this.voteRecords = new Map();
     fs.writeFileSync(
@@ -130,7 +126,7 @@ export class GhettoBackend {
 
       // update and save voter list
       this.voters.push(idCandidate);
-      fs.writeFileSync('data/voter-list.json', JSON.stringify(this.voters));
+      this.saveVoters();
       console.log('new voter ID requested:', idCandidate);
       return idCandidate;
     }
@@ -267,10 +263,19 @@ export class GhettoBackend {
   private saveContestants() {
     fs.writeFileSync('conf/contest-entries.conf.json', JSON.stringify(this.voteCandidates));
   }
+  private saveVoters() {
+    fs.writeFileSync(
+      'data/voter-list.json',
+      JSON.stringify({
+        voters: this.voters,
+        start: this.voteStart
+      })
+    );
+  }
 
   addContestant(contestantData: VoteCandidate) {
     const nextId = this.voteCandidates.length;
-    this.voteCandidates.push({...contestantData, id: nextId});
+    this.voteCandidates.push({...contestantData, id: nextId, imageUpdate: +new Date()});
     this.saveContestants();
     this.reloadContestEntries();
   }
@@ -287,9 +292,9 @@ export class GhettoBackend {
     this.reloadContestEntries();
   }
 
-  addContestantImage(contestantId: number, image: any) {
+  async addContestantImage(contestantId: number, image: any) {
     console.log('adding contestant image. data:');
-    return sharp(image.data)
+    const res = await sharp(image.data)
       .rotate()         // needed for exif
       .resize(1080)
       .webp({
@@ -297,6 +302,12 @@ export class GhettoBackend {
         effort: 6
       })
       .toFile(`data/images/${contestantId}.webp`);
+
+    // for purposes of ghetto caching
+    this.voteCandidates[contestantId].imageUpdate = +(new Date());
+    this.saveContestants();
+    this.reloadContestEntries();
+    return res;
   }
 
   deleteContestant(contestantId: number) {
@@ -312,6 +323,13 @@ export class GhettoBackend {
 
     const deletedEntry = this.voteCandidates.splice(contestantId, 1);
     console.log('deleted contestant:', deletedEntry);
+
+    // update imageUpdate for ghetto caching
+    for (let i = contestantId; i < this.voteCandidates.length; i++) {
+      this.voteCandidates[i].imageUpdate = +(new Date());
+    }
+
+    // reload contestant data
     this.saveContestants();
     this.reloadContestEntries();
   }
