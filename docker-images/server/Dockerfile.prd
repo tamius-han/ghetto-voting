@@ -24,6 +24,7 @@ RUN set -ex \
     && pwd \
     && ls -lah
 
+VOLUME /workspace/data
 ENTRYPOINT ["/sbin/tini", "--"]
 EXPOSE 6969
 CMD ["npm", "run", "run-backend"]

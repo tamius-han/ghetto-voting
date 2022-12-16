@@ -3,6 +3,9 @@ networks:
   private:
   default:
 
+volumes:
+  vote_data:
+
 services:
 
   ################################################################################
@@ -57,6 +60,8 @@ services:
       dockerfile: docker-images/server/Dockerfile.prd
       args:
         - ARG_BASE_IMAGE_DEV_VERSIOM=local
+    volumes:
+      - 'vote_data:/workspace/data'
     networks:
       - 'private'
     labels:
