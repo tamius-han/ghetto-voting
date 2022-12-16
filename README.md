@@ -18,7 +18,6 @@ Slike: ne pipaj
 
 Koda: nared kar hočeš, stvar je itak prevečik podn za resno uporabo lol.
 
-
 ## Postavitev
 
 1. imaš tam `.nvmrc`, ki vsebuje node version. `v14.15.0` za Windows plebe in tiste, ki brez razloga hejtajo nvmrc
@@ -30,12 +29,14 @@ Koda: nared kar hočeš, stvar je itak prevečik podn za resno uporabo lol.
 ### Za razvoj
 
 App:
-```
+
+```sh
 npm run serve
 ```
 
 Api:
-```
+
+```sh
 npm run run-backend
 ```
 
@@ -43,8 +44,9 @@ npm run run-backend
 
 Oboje je na node 14 (obstaja nvmrc). Ne pozabit `npm i` narest.
 
-#### App:
-```
+#### App
+
+```sh
 npm run build
 ```
 
@@ -54,6 +56,41 @@ Stvari se pojavijo v `/dist-app`. To gre na nginx/apache/whatever se uporablja z
 
 Api rabi poslušat na isti domeni/poddomeni, port `6969` (hardkodiran, yes). Api nima narjen proper compilanja/whatevs, samo greš in poženeš isto kot za development:
 
-```
+```sh
 npm run run-backend
+```
+
+### Za docker local deploy
+
+Namesti si Docker Desktop. Aplikacijo lokalno poženež z naslednjimi ukazi:
+
+Base build:
+
+```sh
+docker compose -f .\docker-compose.build-base.yml build
+```
+
+Nato buildaš celoten app:
+
+```sh
+docker compose build
+```
+
+Celoten stack poženeš:
+
+```sh
+docker compose up -d
+```
+
+App ugasneš z:
+
+```sh
+docker compose down -v
+```
+
+Loge gledaš z:
+
+```sh
+docker compose logs -ft server
+docker compose logs -ft client
 ```

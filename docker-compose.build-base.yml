@@ -1,9 +1,9 @@
 services:
 
-  client-base:
-    image: 'druzabni/client-base:local'
+  node-base:
+    image: 'druzabni/node-base:local'
     build:
-      context: docker-images/client-base
+      context: docker-images/node-base
       dockerfile: Dockerfile
       args:
         - ARG_NODE_VERSION=14.18.1-alpine3.12

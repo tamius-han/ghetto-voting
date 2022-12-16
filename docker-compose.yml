@@ -47,3 +47,18 @@ services:
     labels:
       - 'traefik.enable=true'
       - 'traefik.http.routers.client.rule=Host(`${PROJECT_BASE_URL}`)'
+
+  ################################################################################
+  # Backend | 
+  ################################################################################
+  server:
+    image: 'druzabni/server:local'
+    build:
+      dockerfile: docker-images/server/Dockerfile.prd
+      args:
+        - ARG_BASE_IMAGE_DEV_VERSIOM=local
+    networks:
+      - 'private'
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.server.rule=Host(`api.${PROJECT_BASE_URL}`)'
