@@ -1,0 +1,30 @@
+###############################################################################
+#--------------------------    DEVELOPMENT STAGE   ---------------------------#
+###############################################################################
+
+#-----------------------------------------------------------------------------#
+# Pull and rename base image
+ARG ARG_BASE_IMAGE_DEV_VERSIOM
+FROM druzabni/node-base:$ARG_BASE_IMAGE_DEV_VERSIOM AS dev
+
+#-----------------------------------------------------------------------------#
+# Build develop image
+FROM dev AS final
+
+COPY . ./
+RUN set -ex \
+    # print npm and node version
+    && npm -v \
+    && node -v \
+    # Create node_modules folder
+    && mkdir node_modules \
+    # install dependency packages
+    && npm install --development \
+    # print location and content of it
+    && pwd \
+    && ls -lah
+
+VOLUME /workspace/data
+ENTRYPOINT ["/sbin/tini", "--"]
+EXPOSE 6969
+CMD ["npm", "run", "run-backend"]
