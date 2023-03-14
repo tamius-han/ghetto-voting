@@ -31,3 +31,5 @@ conf/contest-entries.conf.json
 data/voter-list.json
 
 data/votes.json
+
+ghetto-tests/test.js
