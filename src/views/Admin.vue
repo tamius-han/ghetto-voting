@@ -333,12 +333,11 @@ export default class AdminComponent extends Vue {
         ...sortedPublic[i],
         combinedScore:
           (sortedPublic[i].intermediateScore ?? 0)
-          + (sortedJury[i].intermediateScore ? sortedJury[i].intermediateScore + this.juryPrecedence: 0)
-          + (this.chuckNorrisVotes.find((x: any) => x.id === sortedPublic[i].id) ?? 0),
+          // 1.01: we add jury score as-is, and then also make it function as a tie-breaker
+          + (sortedJury[i].intermediateScore ? sortedJury[i].intermediateScore * 1.01 : 0),
         combinedScoreMakeup: {
           public: (sortedPublic[i].intermediateScore ?? 0),
           jury: (sortedJury[i].intermediateScore ? sortedJury[i].intermediateScore + this.juryPrecedence: 0),
-          chuck: (this.chuckNorrisVotes.find((x: any) => x.id === sortedPublic[i].id) ?? 0)
         }
       })
     }
