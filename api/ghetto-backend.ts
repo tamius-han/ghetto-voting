@@ -243,6 +243,7 @@ export class GhettoBackend {
       for (let i = 0; i < this.voteCandidates.length; i++) {
         if (fs.existsSync(`data/images/${i}.webp`)) {
           fs.removeSync(`data/images/${i}.webp`);
+          fs.removeSync(`data/images/${i}-full.webp`);
           console.log(`removed data/images/${i}.webp`);
         }
       }
@@ -303,6 +304,15 @@ export class GhettoBackend {
       })
       .toFile(`data/images/${contestantId}.webp`);
 
+    // also convert original image to exif without resizing & with better quality
+    await sharp(image.data)
+      .rotate()         // needed for exif
+      .webp({
+        quality: 80,
+        effort: 6
+      })
+      .toFile(`data/images/${contestantId}-full.webp`);
+
     // for purposes of ghetto caching
     this.voteCandidates[contestantId].imageUpdate = +(new Date());
     this.saveContestants();
@@ -313,11 +323,13 @@ export class GhettoBackend {
   deleteContestant(contestantId: number) {
     // delete image
     fs.removeSync(`data/images/${contestantId}.webp`);
+    fs.removeSync(`data/images/${contestantId}-full.webp`);
 
     // correct contestant images, because removing contestant will change IDs
     for (let i = contestantId + 1; i < this.voteCandidates.length; i++) {
       if (fs.existsSync(`data/images/${i}.webp`)) {
         fs.moveSync(`data/images/${i}.webp`, `data/images/${i - 1}.webp`, { overwrite: true });
+        fs.moveSync(`data/images/${i}-full.webp`, `data/images/${i - 1}-full.webp`, { overwrite: true });
       }
     }
 

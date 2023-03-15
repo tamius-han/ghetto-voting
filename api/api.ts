@@ -55,6 +55,15 @@ export class Main {
         res.send({status: 404});
       }
     });
+    app.get('/contestants/:id/image-full', (req, res) => {
+      try {
+        res.set('image/webp');
+        res.send(fs.readFileSync(`data/images/${req.params.id}-full.webp`));
+      } catch (e) {
+        res.send({status: 404});
+      }
+    });
+
 
     app.post('/contestants/register', jsonParser, (req, res) => {
       console.log('↘↘ registering contestant!', req.body);
