@@ -251,6 +251,13 @@ export default class JuryVotingComponent extends Vue {
     }
 
     console.log('juryMembers:', this.juryMembers);
+
+    // we clear any jury votes
+    for (let i = 0; i < this.juryVotes.length; i++) {
+      this.juryVotes[i] = new Array(this.jurySize);
+    }
+    this.updateJuryVotes();
+
     this.$forceUpdate()
   }
 
