@@ -40,38 +40,135 @@
           :key="contestant.id"
           class="contestant-option d-flex flex-row"
         >
-          <div class="image-container position-relative">
-            <img class="contestant-image" :src="(imageBaseUrl + contestant.id + '/image?gci' + contestant.imageUpdate)" loading="lazy" alt="&nbsp;"/>
-          </div>
-          <div class="contestant-description-votes d-flex flex-column">
-            <h1>{{(index + 1)}}. {{contestant.title}}</h1>
-            <h3>{{contestant.name}}</h3>
+          <div class="backdrop"></div>
+          <div class="content d-flex flex-row">
+            <div class="image-container position-relative">
+              <img class="contestant-image" :src="(imageBaseUrl + contestant.id + '/image?gci' + contestant.imageUpdate)" loading="lazy" alt="&nbsp;"/>
+            </div>
+            <div class="contestant-description-votes d-flex flex-column">
+              <h1>{{(index + 1)}}. {{contestant.title}}</h1>
+              <h3>{{contestant.name}}</h3>
 
-            <div>
-              <hr />
-              <b>Glasovi žirije:</b>
+              <div>
+                <hr />
+                <b>Glasovi žirije:</b>
+                <br />
 
-              <div
-                v-for="(juryMember, juryIndex) of juryMembers"
-                :key="juryMember"
-                class="jury-vote-field"
-                :class="{
-                  'error': juryVotes[index][juryIndex] && isNaN(+(juryVotes[index][juryIndex].replace(',', '.')))
-                }"
-              >
-                <div class="label">{{juryMember}}</div>
-                <input v-model="juryVotes[index][juryIndex]" @blur="updateJuryVotes()" @keydown.enter="updateJuryVotes()" />
+                <div class="d-flex flex-row space-between">
+                  <div
+                    v-for="(juryMember, juryIndex) of juryMembers"
+                    :key="juryMember"
+                    class="jury-vote-field"
+                    :class="{
+                      'error': juryVotes[index][juryIndex] && typeof juryVotes[index][juryIndex] === 'string' && isNaN(+(juryVotes[index][juryIndex].replace(',', '.')))
+                    }"
+                  >
+                    <JuryVotePopup
+                      :rating="+juryVotes[index][juryIndex]"
+                      :jurior="juryMember"
+                      @onRated="updateJuryVote(index, juryIndex, $event)"
+                    ></JuryVotePopup>
+                    <!-- <div class="label">{{juryMember}}</div> -->
+                    <!-- <input v-model="juryVotes[index][juryIndex]" @blur="updateJuryVotes()" @keydown.enter="updateJuryVotes()" /> -->
+                  </div>
+                </div>
               </div>
             </div>
+
           </div>
-
-
             <!-- bar with contestant info -->
 
         </div>
       </div>
 
-       <div class="button">Potrdi glasove</div>
+
+      <div class="bottom-button-panel">
+        <div class="button" @click="conflictDetection()">Potrdi glasove</div>
+      </div>
+
+      <div
+        v-if="tieList.length > 0"
+        class="tie-resolution-bg"
+      >
+        <div class="tie-resolution-window">
+          <div class="window-header">Oi, šmorn in kravate!</div>
+          <div class="window-content">
+            <template v-if="currentTie === -1">
+              <img />
+              <div>
+                <h1>Nekateri tekmovalci imajo izenačene ocene, cajt je za podaljške</h1>
+                <p>To bo lahko kasneje problem. Prosim razvrstite vse izenačene tekmovalce.</p>
+                <ul>
+                  <li>
+                    Ocenite tekmovalce od 1 do 10
+                  </li>
+                  <li>
+                    To doda tekmovalcu 0.01 - 0.1 dodatnih točk
+                  </li>
+                  <li>
+                    Dodatne točke ne morejo tekmovalcu dati višjega ali nižjega mesta, kot je bilo doseženo med normalnim glasovanjem.<br/>
+                    t.j. če imaš na drugem mestu 3 ljudi, potem nobena ocena ne bo potisnila tekmovalca na 1. mesto.<br/>
+                    tisti, ki so od izenačenih slabše uvrščeni, bodo tudi ostali slabše uvrščeni
+                  </li>
+                  <div>
+                  </div>
+                </ul>
+              </div>
+
+              <div class="button" @click="currentTie = 0">Začni</div>
+            </template>
+            <template v-else-if="currentTie < tieList.length">
+              <h1>Kravata {{ currentTie + 1 }} od {{ tieList.length }}</h1>
+              <sup><sup><sup>kremžite se ssn</sup></sup></sup>
+
+              <!-- vsebnik seznama tekmovalcev -->
+              <div>
+
+                <!-- kartica tekmovalca -->
+                <div
+                  v-for="(contestant, index) of tieList[currentTie].contestants"
+                  :key="contestant.id"
+                  class="contestant-option d-flex flex-row"
+                >
+                  <div class="backdrop"></div>
+                  <div class="content d-flex flex-row">
+                    <div class="image-container position-relative">
+                      <img class="contestant-image" :src="(imageBaseUrl + contestant.id + '/image?gci' + contestant.imageUpdate)" loading="lazy" alt="&nbsp;"/>
+                    </div>
+                    <div class="contestant-description-votes d-flex flex-column">
+                      <h1>{{(index + 1)}}. {{contestant.title}}</h1>
+                      <h3>{{contestant.name}}</h3>
+                      <div class="flex flex-row">
+                        <div class="d-flex flex-row button-row">
+                          <div
+                            v-for="n in 10"
+                            :key="n"
+                            class="rate-button"
+                            :class="{'selected': n === contestant.rating}"
+                            @click="resolveTie(index, contestant.id, n)"
+                          >
+                            {{n}}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+
+                <div class="bottom-button-panel">
+                  <p>Pritisni gumb za potrditev razvrstve. <b>Ko je gumb pritisnjen, popravki niso več mogoči.</b></p>
+                  <div v-if="isCurrentTieResolved" class="button" @click="nextTie()">Razvozljaj kravato</div>
+                  <div v-else>Gumb se bo pokazal, ko bodo tekmovalci ustrezno razvrščeni.</div>
+                </div>
+              </div>
+            </template>
+            <template v-else>
+              Ye, we done.
+            </template>
+          </div>
+        </div>
+      </div>
     </template>
   </div>
 </template>
@@ -79,11 +176,13 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import HelloWorld from '@/components/HelloWorld.vue'; // @ is an alias to /src
+import JuryVotePopup from '@/components/JuryVotePopup.vue';
 import http from '@/http-common';
 
 @Options({
   components: {
     HelloWorld,
+    JuryVotePopup
   },
 })
 export default class JuryVotingComponent extends Vue {
@@ -97,6 +196,10 @@ export default class JuryVotingComponent extends Vue {
 
   contestants: any[] = [];
   imageBaseUrl?: string;
+
+  tieList: any[] = [];
+  currentTie = -1;
+  isCurrentTieResolved = false;
 
   async created() {
     this.imageBaseUrl = `${http.defaults.baseURL}contestants/`;
@@ -147,31 +250,114 @@ export default class JuryVotingComponent extends Vue {
       }
     }
 
-    console.log('juryMembers:', this.juryMembers)
+    console.log('juryMembers:', this.juryMembers);
     this.$forceUpdate()
   }
 
+  updateJuryVote(contestant: number, jurior: number, rating: number) {
+    console.log('current jury votes:', this.juryVotes);
+    this.juryVotes[contestant][jurior] = rating;
+    this.updateJuryVotes();
+  }
+
   updateJuryVotes() {
+    console.log('juiry on start updateJuryVotes:', JSON.parse(JSON.stringify(this.juryVotes)));
+
     // ensure that we only send jury votes that exist
     const voteCollection = JSON.parse(JSON.stringify(this.juryVotes));
     for (const contestant of voteCollection) {
-      for (let i = this.jurySize; i < contestant.length; i++) {
-        contestant[i] = undefined;
-      }
+      // nope — we're repurposing contestants[jurySize] as tie resolve
+      // for (let i = this.jurySize + 1; i < contestant.length; i++) {
+      //   contestant[i] = undefined;
+      // }
       for (let i = 0; i < contestant.length; i++) {
+        // convert strings to numbers where necessary
         if (contestant[i]) {
-          contestant[i] = +(contestant[i].replace(',', '.'));
+          if (typeof contestant[i] === 'string') {
+            contestant[i] = +(contestant[i].replace(',', '.'));
 
-          if (isNaN(contestant[i])) {
-            console.warn('ena stvar tukaj ni številka. sussy.');
-            console.warn('ne bomo posredovali glasu')
-            return;
+            if (isNaN(contestant[i])) {
+              console.warn('ena stvar tukaj ni številka. sussy.');
+              console.warn('ne bomo posredovali glasu')
+              return;
+            }
           }
+        } else {
+          contestant[i] = +contestant[i]
         }
       }
     }
 
-    http.post('/jury-votes', {votes: voteCollection});
+    return http.post('/jury-votes', {votes: voteCollection});
+  }
+
+
+  async conflictDetection() {
+    // ensure votes get updated, even though theoretically not necessary
+    await this.updateJuryVotes();
+
+    // get semi-computed results from the server
+    const rawData =  (await http.get('/results'))?.data ?? [];
+
+    const sortedJury = JSON.parse(JSON.stringify(rawData)).sort((a: any, b: any) => {return b.juryVotes - a.juryVotes});
+    console.log('sorted jury votes:', sortedJury)
+
+    const conflicts = [];
+
+    for (let i = 0; i < sortedJury.length - 1; i++) {
+      if (sortedJury[i].juryVotes === sortedJury[i+1].juryVotes) {  // if tied:
+        if (                                                        // add new conflict when
+          !conflicts.length                                                     // no conflicts exist; OR
+          || conflicts[conflicts.length - 1].votes !== sortedJury[i].juryVotes  // last conflict was for a different total score
+        ) {
+          conflicts.push({
+            votes: sortedJury[i].juryVotes,
+            contestants: [sortedJury[i], sortedJury[i+1]]
+          });
+        } else {                                                   // if last conflict was for same total jury score:
+          conflicts[conflicts.length - 1].contestants.push(sortedJury[i+1])  // add this contestant to the contestant pile
+        }
+      }
+    }
+
+    // This means all conflicts are processed
+    this.tieList = conflicts;
+    console.log('ties:', conflicts)
+  }
+
+  resolveTie(tieListIndex: number, contestantId: number, rating: number) {
+    this.tieList[this.currentTie].contestants[tieListIndex].rating = rating;
+    const juryVotesIndex = this.contestants.findIndex(x => x.id === contestantId);
+    this.juryVotes[juryVotesIndex][this.jurySize] = rating / 100;
+
+    console.log('juiry votes on tie resolved:', JSON.parse(JSON.stringify(this.juryVotes)));
+
+    this.verifyTieResolution();
+  }
+
+  verifyTieResolution() {
+    let currentRating;
+    let validRanking = true;
+    for (let i = 0; i < this.tieList[this.currentTie].contestants.length - 1; i++) {
+      currentRating = this.tieList[this.currentTie].contestants[i].rating;
+
+      for (let j = i + 1; j < this.tieList[this.currentTie].contestants.length; j++) {
+        if (currentRating === this.tieList[this.currentTie].contestants[j].rating) {
+          validRanking = false;
+        }
+      }
+    }
+
+    this.isCurrentTieResolved = validRanking;
+  }
+
+  nextTie() {
+    this.verifyTieResolution();
+
+    if (this.isCurrentTieResolved) {
+      this.currentTie++;
+      this.updateJuryVotes();
+    }
   }
 }
 </script>
@@ -231,7 +417,20 @@ export default class JuryVotingComponent extends Vue {
   width: 69rem;
   margin: 2rem;
   padding: 1rem;
-  backdrop-filter: blur(5px) brightness(0.24) saturate(0.5);
+
+  position: relative;
+
+  .backdrop, .content {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .backdrop {
+    backdrop-filter: blur(5px) brightness(0.24) saturate(0.5);
+  }
+
 
   .image-container {
     width: 21rem;
@@ -247,6 +446,78 @@ export default class JuryVotingComponent extends Vue {
     font-weight: 300;
     opacity: 0.75;
   }
+}
+
+.tie-resolution-bg {
+  display: block;
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  backdrop-filter: blur(16px);
+
+  overflow: auto;
+
+  .window-title-bar {
+    background: #000;
+    padding: 0.25rem 1rem;
+  }
+
+  .popup-window {
+    margin: 5%;
+    background-color: rgba(0,0,0,0.5);
+    height: 90%;
+    width: 90%;
+  }
+
+}
+
+
+.button-row {
+  justify-content: center;
+  align-items: center;
+}
+
+.rate-button {
+  background-color: rgba(0,0,0,0.5);
+  margin: 0.125rem;
+  width: 9%;
+  aspect-ratio: 1;
+  text-align: center;
+
+  &.selected {
+    background-color: #fa6;
+    color: #000
+  }
+}
+
+.button {
+  border: 1px solid #fa6;
+  color: #fa6;
+  background-color: rgba(255, 171, 102, 0.25);
+  padding: 1rem 2.5rem;
+
+  &.error {
+    color: #f00;
+    border: 1px solid #f00;
+    background-color: rgba(255, 0, 0, 0.25);
+  }
+}
+
+.bottom-button-panel {
+  margin-top: 3.50rem;
+  margin-bottom: 2rem;
+  backdrop-filter: blur(5px) brightness(0.24) saturate(0.5);
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  padding: 2.5rem;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
 }
 </style>
 
