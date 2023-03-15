@@ -2,38 +2,52 @@
   <div class="page-bg"></div>
 
   <div class="page-jury">
-    <h1>Glasovanje žirije</h1>
 
-    <div v-if="(passwordPhase === 0)">
+    <div v-if="passwordPhase < 2" class="bottom-button-panel">
+      <h1>Glasovanje žirije</h1>
 
-      <div>
-        Reči 'prijatelj' in vsopi.
+      <div v-if="(passwordPhase === 0)">
+
+        <div>
+          Reči 'prijatelj' in vsopi.
+        </div>
+        <div>
+          <input v-model="password"  @input="checkPassword()" />
+        </div>
       </div>
-      <div>
-        <input v-model="password"  @input="checkPassword()" />
-      </div>
-    </div>
-    <div v-if="(passwordPhase === 1)">
-      <div>
-        ola vilinska zgaga, spizdi
-      </div>
-      <div>
-        <input v-model="password" @input="checkPassword()"/>
+      <div v-if="(passwordPhase === 1)">
+        <div>
+          ola vilinska zgaga, spizdi
+        </div>
+        <div>
+          <input v-model="password" @input="checkPassword()"/>
+        </div>
       </div>
     </div>
 
     <template v-if="(passwordPhase === 2)">
-      <div>
-        Člani žirije: <input v-model="jurySize" /> <div class="button" @click="updateJurySize()">Potrdi</div>
-      </div>
-      <div class="">
-        <p>Imena članov</p>
-        <div v-for="(m, index) of juryMembers" :key="index">
-          <input v-model="juryMembers[index]" />
+
+      <div class="bottom-button-panel">
+        <h1>Glasovanje žirije</h1>
+
+        <div>
+          Člani žirije: <input v-model="jurySize" /> <div class="button" @click="updateJurySize()">Potrdi</div>
         </div>
+        <div class="">
+          <p>Imena članov</p>
+          <div v-for="(m, index) of juryMembers" :key="index">
+            <input v-model="juryMembers[index]" />
+          </div>
+        </div>
+
+        <div>
+          <br/>
+          <br/>
+          <br/>
+        </div>
+        <h3>Seznam tekmovalcev:</h3>
       </div>
 
-      <h3>Seznam tekmovalcev:</h3>
       <div>
         <div
           v-for="(contestant, index) of contestants"
@@ -43,7 +57,7 @@
           <div class="backdrop"></div>
           <div class="content d-flex flex-row">
             <div class="image-container position-relative">
-              <img class="contestant-image" :src="(imageBaseUrl + contestant.id + '/image?gci' + contestant.imageUpdate)" loading="lazy" alt="&nbsp;"/>
+              <ContestantZoomableImage :contestant="contestant"></ContestantZoomableImage>
             </div>
             <div class="contestant-description-votes d-flex flex-column">
               <h1>{{(index + 1)}}. {{contestant.title}}</h1>
@@ -54,7 +68,7 @@
                 <b>Glasovi žirije:</b>
                 <br />
 
-                <div class="d-flex flex-row space-between">
+                <div class="d-flex flex-row space-between jury-vote-buttons">
                   <div
                     v-for="(juryMember, juryIndex) of juryMembers"
                     :key="juryMember"
@@ -91,11 +105,12 @@
         class="tie-resolution-bg"
       >
         <div class="tie-resolution-window">
-          <div class="window-header">Oi, šmorn in kravate!</div>
+
+
           <div class="window-content">
             <template v-if="currentTie === -1">
-              <img />
-              <div>
+              <div class="bottom-button-panel">
+                <div class="window-header">Oi, šmorn in kravate!</div>
                 <h1>Nekateri tekmovalci imajo izenačene ocene, cajt je za podaljške</h1>
                 <p>To bo lahko kasneje problem. Prosim razvrstite vse izenačene tekmovalce.</p>
                 <ul>
@@ -113,13 +128,15 @@
                   <div>
                   </div>
                 </ul>
-              </div>
-
               <div class="button" @click="currentTie = 0">Začni</div>
+
+              </div>
             </template>
             <template v-else-if="currentTie < tieList.length">
-              <h1>Kravata {{ currentTie + 1 }} od {{ tieList.length }}</h1>
-              <sup><sup><sup>kremžite se ssn</sup></sup></sup>
+              <div class="bottom-button-panel">
+                <h1>Kravata {{ currentTie + 1 }} od {{ tieList.length }}</h1>
+                <sup><sup><sup>kremžite se ssn</sup></sup></sup>
+              </div>
 
               <!-- vsebnik seznama tekmovalcev -->
               <div>
@@ -133,7 +150,7 @@
                   <div class="backdrop"></div>
                   <div class="content d-flex flex-row">
                     <div class="image-container position-relative">
-                      <img class="contestant-image" :src="(imageBaseUrl + contestant.id + '/image?gci' + contestant.imageUpdate)" loading="lazy" alt="&nbsp;"/>
+                      <ContestantZoomableImage :contestant="contestant"></ContestantZoomableImage>
                     </div>
                     <div class="contestant-description-votes d-flex flex-column">
                       <h1>{{(index + 1)}}. {{contestant.title}}</h1>
@@ -178,11 +195,12 @@ import { Options, Vue } from 'vue-class-component';
 import HelloWorld from '@/components/HelloWorld.vue'; // @ is an alias to /src
 import JuryVotePopup from '@/components/JuryVotePopup.vue';
 import http from '@/http-common';
+import ContestantZoomableImage from '@/components/ContestantZoomableImage.vue';
 
 @Options({
   components: {
-    HelloWorld,
-    JuryVotePopup
+    JuryVotePopup,
+    ContestantZoomableImage
   },
 })
 export default class JuryVotingComponent extends Vue {
@@ -384,12 +402,12 @@ export default class JuryVotingComponent extends Vue {
   background-position: 55% center;
 }
 
-.jury-vote-field {
-  width: 100%;
-  input {
-    width: 100%;
-  }
-}
+// .jury-vote-field {
+//   width: 100%;
+//   input {
+//     width: 100%;
+//   }
+// }
 
 .page-jury {
   position: relative;
@@ -420,28 +438,42 @@ export default class JuryVotingComponent extends Vue {
 }
 
 .contestant-option {
-  height: 32rem;
-  width: 69rem;
-  margin: 2rem;
-  padding: 1rem;
+  box-sizing:border-box;
+
+  height: unset;
+  width: calc(100% - 4rem);
+  margin: 3rem 2rem;
+  // padding: 0rem 1rem;
+
+  border: 4px solid #000;
 
   position: relative;
 
-  .backdrop, .content {
+  .backdrop {
     position: absolute;
-    top: 0; left: 0;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
+
+    z-index: -1;
   }
 
   .backdrop {
     backdrop-filter: blur(5px) brightness(0.24) saturate(0.5);
   }
 
+  .content {
+    width: 100%;
+  }
+
+  .contestant-description-votes {
+    padding: 1rem;
+  }
 
   .image-container {
     width: 21rem;
-    margin-right: 4rem;
+    margin-right: 1rem;
   }
 
   h1 {
@@ -494,6 +526,15 @@ export default class JuryVotingComponent extends Vue {
   aspect-ratio: 1;
   text-align: center;
 
+  border: 1px solid rgba(#fa6, 0.5);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 2.5rem;
+  font-weight: 300;
+
   &.selected {
     background-color: #fa6;
     color: #000
@@ -525,6 +566,14 @@ export default class JuryVotingComponent extends Vue {
   text-align: center;
   align-items: center;
   justify-content: center;
+}
+
+.space-between {
+  justify-content: space-between;
+}
+.jury-vote-buttons {
+  margin-top: 1rem;
+  margin-bottom: 4.20rem;
 }
 </style>
 

@@ -529,12 +529,11 @@ $thirdPlaceBronze: rgb(172, 117, 66);
   @media (min-width: 2560px) {
     font-size: 16px;
     h1 {
-    font-size: 2.5em;
-  }
-  h3 {
-    font-size: 1.5em;
-  }
-
+      font-size: 2.5em;
+    }
+    h3 {
+      font-size: 1.5em;
+    }
   }
 
   position: relative;

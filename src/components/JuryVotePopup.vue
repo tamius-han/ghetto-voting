@@ -20,6 +20,7 @@
       </div>
       <div class="window-content">
         <h1>Stisni oceno</h1>
+        <div><br/><br/><br/><br/><br/></div>
         <div class="d-flex flex-row button-row">
           <div
             v-for="n in 10"
@@ -43,6 +44,7 @@
             {{n + 0.5}}
           </div>
         </div>
+        <div><br/><br/><br/><br/><br/></div>
       </div>
     </div>
   </div>
@@ -91,6 +93,20 @@ export default class JuryVotePopup extends Vue {
     background-color: rgba(0,0,0,0.5);
     height: 90%;
     width: 90%;
+
+    .window-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+
+      > div {
+        width: 100%;
+      }
+    }
+
   }
 
 }
@@ -107,6 +123,15 @@ export default class JuryVotePopup extends Vue {
   aspect-ratio: 1;
   text-align: center;
 
+  border: 1px solid rgba(#fa6, 0.5);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 2.5rem;
+  font-weight: 300;
+
   &.selected {
     background-color: #fa6;
     color: #000
@@ -121,5 +146,7 @@ export default class JuryVotePopup extends Vue {
   justify-items: center;
   align-items: center;
   justify-content: center;
+
+  border: 1px solid rgba(#fa6, 0.5);
 }
 </style>
