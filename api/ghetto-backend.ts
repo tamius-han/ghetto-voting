@@ -101,7 +101,7 @@ export class GhettoBackend {
     this.voteEndTime = undefined;
   }
 
-  stopVoting(endTime: Date) {
+  stopVoting(endTime?: Date) {
     if (endTime && endTime > new Date()) {
       this.voteEndTime = endTime;
       setTimeout(() => {
