@@ -13,6 +13,8 @@ export class GhettoBackend {
   processedVoteCandidates: {[x: number]: VoteCandidate} = {};
   voters: string[] = [];
   voteStart: Date = new Date();
+  voteEndTime?: Date;
+  votesAllowed = false;
   lastPublicVoteTime?: number;
 
   ghettoConf = {
@@ -79,6 +81,8 @@ export class GhettoBackend {
   resetVoting() {
     this.voters = [];
     this.voteStart = new Date();
+    this.votesAllowed = false;
+    this.voteEndTime = undefined;
     this.lastPublicVoteTime = undefined;
 
     this.saveVoters();
@@ -90,6 +94,24 @@ export class GhettoBackend {
         Object.fromEntries(this.voteRecords)
       )
     );
+  }
+
+  startVoting() {
+    this.votesAllowed = true;
+    this.voteEndTime = undefined;
+  }
+
+  stopVoting(endTime: Date) {
+    if (endTime && endTime > new Date()) {
+      this.voteEndTime = endTime;
+      setTimeout(() => {
+        this.votesAllowed = false;
+        this.voteEndTime = new Date(+new Date() + 30000); // grace period when voting gets closed
+      }, +endTime - +new Date());
+    } else {
+      this.votesAllowed = false;
+      this.voteEndTime = new Date(+new Date() + 30000); // stop accepting votes 30 seconds from now
+    }
   }
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -105,7 +127,7 @@ export class GhettoBackend {
 
   getVoteStart() {
     return {
-      voteStart: +this.voteStart
+      voteStart: +this.voteStart,
     }
   }
 
@@ -174,6 +196,9 @@ export class GhettoBackend {
     }
     if (!this.voteValidatorService.validateVote(vote)) {
       throw new Error('INVALID_VOTE');
+    }
+    if (this.voteEndTime && new Date() > this.voteEndTime) {
+      throw new Error('VOTE_AFTER_GRACE');
     }
 
     this.lastPublicVoteTime = +new Date();

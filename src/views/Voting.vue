@@ -35,8 +35,15 @@
               <p>Če lahko čez 15-30s probaš še enkrat naložiti to stran, bi blo fajn.</p>
             </template>
             <template v-else>Podatki se nalagajo ... počasi.</template>
+          </div>
         </div>
-        </div>
+      </div>
+      <div v-else-if="!votesAllowed">
+          <di style="text-align: center">
+            <br/><br/>
+            <p><img style="max-width: 100%" src="../assets/images/not-yet.webp" /><br/></p>
+            <p>Glasovanje še ni odprto za javnost.</p>
+          </di>
       </div>
       <div v-else-if="contestants && contestants.length === 0">
         <h2>Malo prezgodej za glasovanje, eh?</h2>
@@ -156,8 +163,11 @@ export default class VotingComponent extends Vue {
   currentAvailableVotesLeft: any[] = [];
   myVotes: Vote[] = [];
   activeContestantVoteMenu?: number = -1;
+  votesAllowed?: boolean = false;
 
   backendError = false;
+
+  voteCheckInterval: any;
 
   created() {
     this.setupVoting();
@@ -171,10 +181,31 @@ export default class VotingComponent extends Vue {
       await this.listContestants();  // must be loaded _before_ user's current votes load
       await this.getVoteConfig();
       await this.getMyVotes();
+
+
+      window.addEventListener('focus', () => {
+        this.refreshVoteStatus();
+        if (this.voteCheckInterval) {
+          clearInterval(this.voteCheckInterval);
+        }
+        this.voteCheckInterval = setInterval(this.refreshVoteStatus, 15000 + Math.random() * 6.9);
+      });
+      window.addEventListener('blur', () => {
+        clearInterval(this.voteCheckInterval);
+      });
+
+      this.voteCheckInterval = setInterval(this.refreshVoteStatus, 15000 + Math.random() * 6.9);
     } catch (e) {
       this.backendError = true;
       throw e;
     }
+  }
+
+  private async refreshVoteStatus() {
+    // if this ever goes through cloudflare, this should trick it into caching
+    // request made within a period of 3 seconds
+    const res = await http.get(`/vote-start?ts=${(+new Date() / 3000).toFixed()}`);
+    this.votesAllowed = res.data.votesAllowed;
   }
 
   private async getId() {
@@ -185,6 +216,8 @@ export default class VotingComponent extends Vue {
       const voteStart = JSON.parse(startTimeObjStr).startTime;
 
       const res = await http.get('/vote-start');
+
+      this.votesAllowed = res.data.votesAllowed;
 
       if (voteStart === res.data.voteStart) {
         resetId = false;

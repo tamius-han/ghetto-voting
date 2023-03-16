@@ -38,7 +38,9 @@
             <template v-if="lastPublicVoteAgo">
               Čas od zadnjega glasu: {{lastPublicVoteAgo}}<br/>
               Volilnih upravičencev: {{voteStatistics.voters}}<br/>
-              Oddanih glasovnic: {{voteStatistics.submittedVotes}}<br/>&nbsp;
+              Oddanih glasovnic: {{voteStatistics.submittedVotes}}<br/>
+              Stanje glasovanja: <span v-if="votesAllowed" style="color: #3fa">odprto</span><span v-else style="font-weight: 700; color: #f00">ZAPRTO</span><br/>
+              &nbsp;
             </template>
           </div>
 
@@ -46,6 +48,13 @@
             <div class="button" @click="resetContestants()">Počisti tekmovalce</div>
             <div class="button" @click="resetVoting()">Resetiraj glasovanje</div>
           </div>
+
+          <div class="d-flex flex-row">
+            <div class="button" @click="startVoting">Začni glasovanje</div>
+            <div class="button red" @click="startVoting">Ustavi glasovanje</div>
+          </div>
+
+
           <div></div>
           <a @click="showLoadTesting = !showLoadTesting">Skrij/pokaži možnosti testiranja obremenitve</a>
           <template v-if="showLoadTesting">
@@ -220,12 +229,15 @@ export default class AdminComponent extends Vue {
 
   showLoadTesting = false;
 
+  votesAllowed = false;
+
   created() {
     this.reloadContestants();
     this.password = localStorage.getItem('pass-admin') ?? '';
     this.checkPassword();
 
     setInterval(() => this.reloadContestants(), 15000);
+    setInterval(() => this.refreshVoteStatus(), 5000);
   }
 
   checkPassword() {
@@ -241,6 +253,14 @@ export default class AdminComponent extends Vue {
 
     localStorage.setItem('pass-admin', this.password);
   }
+
+  private async refreshVoteStatus() {
+    // if this ever goes through cloudflare, this should trick it into caching
+    // request made within a period of 3 seconds
+    const res = await http.get(`/vote-start?ts=${(+new Date() / 3000).toFixed()}`);
+    this.votesAllowed = res.data.votesAllowed;
+  }
+
 
   async reloadContestants() {
     this.activeRefresh = true;
@@ -353,6 +373,14 @@ export default class AdminComponent extends Vue {
   async resetVoting() {
     await http.post('/reset/voting', {}, { headers: {authorization: 'jakikaki'}});
     this.reloadContestants();
+  }
+
+  async startVoting() {
+    await http.post('/start/voting', {}, {headers: {authorization: 'jakikaki'}});
+  }
+
+  async stopVoting() {
+    await http.post('/stop/voting', {}, {headers: {authorization: 'jakikaki'}});
   }
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types

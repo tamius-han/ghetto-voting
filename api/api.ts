@@ -22,7 +22,8 @@ export class Main {
 
     app.get('/vote-start', (req, res) => {
       res.send({
-        voteStart: +backend.voteStart
+        voteStart: +backend.voteStart,
+        votesAllowed: backend.votesAllowed
       });
     });
 
@@ -35,7 +36,8 @@ export class Main {
     app.get('/voter-id', (req, res) => {
       res.send({
         id: backend.generateVoterId(),
-        voteStart: +backend.voteStart
+        voteStart: +backend.voteStart,
+        votesAllowed: backend.votesAllowed
       });
     });
 
@@ -127,6 +129,22 @@ export class Main {
     app.post('/reset/contestants', jsonParser, (req, res) => {
       if (req.headers.authorization === 'jakikaki') {
         res.send(backend.resetVoteCandidates());
+      } else {
+        res.send({status: 403});
+      }
+    });
+
+    app.post('/start/voting', jsonParser, (req, res) => {
+      if (req.headers.authorization === 'jakikaki') {
+        res.send(backend.startVoting());
+      } else {
+        res.send({status: 403});
+      }
+    });
+
+    app.post('/stop/voting', jsonParser, (req, res) => {
+      if (req.headers.authorization === 'jakikaki') {
+        res.send(backend.stopVoting());
       } else {
         res.send({status: 403});
       }
