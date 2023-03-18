@@ -23,7 +23,8 @@ export class Main {
     app.get('/vote-start', (req, res) => {
       res.send({
         voteStart: +backend.voteStart,
-        votesAllowed: backend.votesAllowed
+        votingStarted: backend.votingStarted,
+        votingEnded: backend.votingEnded,
       });
     });
 
@@ -37,7 +38,7 @@ export class Main {
       res.send({
         id: backend.generateVoterId(),
         voteStart: +backend.voteStart,
-        votesAllowed: backend.votesAllowed
+        votesAllowed: backend.votingStarted
       });
     });
 

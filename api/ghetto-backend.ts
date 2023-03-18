@@ -14,7 +14,8 @@ export class GhettoBackend {
   voters: string[] = [];
   voteStart: Date = new Date();
   voteEndTime?: Date;
-  votesAllowed = false;
+  votingStarted = false;
+  votingEnded = false;
   lastPublicVoteTime?: number;
 
   ghettoConf = {
@@ -81,7 +82,7 @@ export class GhettoBackend {
   resetVoting() {
     this.voters = [];
     this.voteStart = new Date();
-    this.votesAllowed = false;
+    this.votingStarted = false;
     this.voteEndTime = undefined;
     this.lastPublicVoteTime = undefined;
 
@@ -97,19 +98,22 @@ export class GhettoBackend {
   }
 
   startVoting() {
-    this.votesAllowed = true;
+    this.votingStarted = true;
+    this.votingEnded = false;
     this.voteEndTime = undefined;
   }
 
   stopVoting(endTime?: Date) {
+    this.votingEnded = true;
+
     if (endTime && endTime > new Date()) {
       this.voteEndTime = endTime;
       setTimeout(() => {
-        this.votesAllowed = false;
+        this.votingStarted = false;
         this.voteEndTime = new Date(+new Date() + 30000); // grace period when voting gets closed
       }, +endTime - +new Date());
     } else {
-      this.votesAllowed = false;
+      this.votingStarted = false;
       this.voteEndTime = new Date(+new Date() + 30000); // stop accepting votes 30 seconds from now
     }
   }
