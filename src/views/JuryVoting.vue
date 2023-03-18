@@ -101,7 +101,7 @@
       </div>
 
       <div
-        v-if="tieList.length > 0"
+        v-if="tieList.length > 0 || currentTie > 0"
         class="tie-resolution-bg"
       >
         <div class="tie-resolution-window">
@@ -181,7 +181,12 @@
               </div>
             </template>
             <template v-else>
-              Ye, we done.
+              <div class="bottom-button-panel">
+                <h1>THE NEEDFUL HAS BEEN DONE</h1>
+                <p>Vaše delo je opravljeno.</p>
+                <p>Hvala za sodelovanje, pohvala za dobro opravljeno delo, za glasbene želje se pa priporočite DJ-ju 😂😂😂</p>
+                <p><sub><strike>sir do not redeem</strike></sub></p>
+              </div>
             </template>
           </div>
         </div>
@@ -347,6 +352,11 @@ export default class JuryVotingComponent extends Vue {
 
     // This means all conflicts are processed
     this.tieList = conflicts;
+    if (this.tieList.length) {
+      this.currentTie = -1;
+    } else {
+      this.currentTie = 1;
+    }
     console.log('ties:', conflicts)
   }
 

@@ -67,7 +67,6 @@ export default class ContestantZoomableImage extends Vue {
   isOpen = false;
   imageBaseUrl = '';
 
-
   trs = {
     isDrag: false,
     x: 0,
@@ -93,24 +92,34 @@ export default class ContestantZoomableImage extends Vue {
 
 
   openPopup() {
-
     this.isOpen = true;
     this.$nextTick( () => {
       this.$refs.draggable.addEventListener('mousedown', this.handleMouseDown);
       this.$refs.draggable.addEventListener('mouseup', this.handleMouseUp);
       this.$refs.draggable.addEventListener('mouseleave', this.handleMouseUp);
       this.$refs.draggable.addEventListener('mousemove', this.handleMouseMove);
+      this.$refs.draggable.addEventListener('touchmove', this.handleMouseMove);
       this.$refs.draggable.addEventListener('wheel', this.handleScroll);
+
+      // pinch zoom
+      // this.$refs.draggable.addEventListener('pointerdown', this.handlePointerDown);
+      // this.$refs.draggable.addEventListener('pointermove', this.handlePointerMove);
+      // this.$refs.draggable.addEventListener('pointerup', this.handlePointerUp);
+      // this.$refs.draggable.addEventListener('pointercancel', this.handlePointerUp);
+      // this.$refs.draggable.addEventListener('pointerout', this.handlePointerUp);
+      // this.$refs.draggable.addEventListener('pointerleave', this.handlePointerUp);
     });
   }
 
   closePopup() {
     this.$refs.draggable.removeEventListener('mousedown', this.handleMouseDown);
     this.$refs.draggable.removeEventListener('mouseup', this.handleMouseUp);
+    this.$refs.draggable.removeEventListener('mouseleave', this.handleMouseUp);
     this.$refs.draggable.removeEventListener('mousemove', this.handleMouseMove);
+    this.$refs.draggable.removeEventListener('touchmove', this.handleMouseMove);
+    this.$refs.draggable.removeEventListener('wheel', this.handleScroll);
     this.isOpen = false;
   }
-
 
   fitZoom() {
     const {clientWidth, clientHeight} = this.$refs.draggable;
@@ -135,6 +144,66 @@ export default class ContestantZoomableImage extends Vue {
     this.trs.baseZoom = 1;
     this.trs.zoom = 1;
     this.handleImagePosition();
+  }
+
+  eventCache = [];
+  handlePointerDown(event) {
+    this.eventCache.push(event);
+    console.log('pointer down:', event);
+  }
+
+  // MDN theft intensifies
+  prevDiff = 0;
+  handlePointerMove(ev) {
+    // This function implements a 2-pointer horizontal pinch/zoom gesture.
+    //
+    // If the distance between the two pointers has increased (zoom in),
+    // the target element's background is changed to "pink" and if the
+    // distance is decreasing (zoom out), the color is changed to "lightblue".
+    //
+    // This function sets the target element's border to "dashed" to visually
+    // indicate the pointer's target received a move event.
+    console.log("pointerMove", ev);
+
+    // Find this event in the cache and update its record with this event
+    const index = this.eventCache.findIndex(
+      (cachedEv) => cachedEv.pointerId === ev.pointerId
+    );
+    this.eventCache[index] = ev;
+
+    // If two pointers are down, check for pinch gestures
+    if (this.eventCache.length === 2) {
+      // Calculate the distance between the two pointers
+      const curDiff = Math.abs(this.eventCache[0].clientX - this.eventCache[1].clientX);
+
+      if (this.prevDiff > 0) {
+        if (curDiff > this.prevDiff) {
+          // The distance between the two pointers has increased
+          console.log("Pinch moving OUT -> Zoom in", ev);
+        }
+        if (curDiff < this.prevDiff) {
+          // The distance between the two pointers has decreased
+          console.log("Pinch moving IN -> Zoom out", ev);
+        }
+      }
+
+      // Cache the distance for the next move event
+      this.trs.scrollZoom += curDiff - this.prevDiff;
+      this.handleZoom()
+
+      this.prevDiff = curDiff;
+      ev.preventDefault;
+    }
+  }
+
+  handlePointerUp(event) {
+    console.log('pointer ended:', event);
+    const index = this.eventCache.findIndex(
+      (cachedEv) => cachedEv.pointerId === event.pointerId
+    );
+    if (index !== -1) {
+      this.eventCache.splice(index, 1);
+    }
   }
 
   handleImageLoaded(event) {
@@ -203,22 +272,33 @@ export default class ContestantZoomableImage extends Vue {
     event.preventDefault();
   }
 
+  handleTouchMove(event) {
+    console.log('received mousemove event!', event);
+  }
+
   handleMouseMove(event) {
-    console.log('received mousemove event!');
     if (this.trs.isDrag) {
       this.trs.x += event.movementX;
       this.trs.y += event.movementY;
 
       this.handleImagePosition();
+      event.preventDefault();
     }
   }
 
   handleScroll(event) {
-    console.log('scroll', event)
     this.trs.scrollZoom -= (event.deltaY / 250);
-    this.trs.scrollZoom = Math.min(4, Math.max(this.trs.scrollZoom, 1));
-
+    this.handleZoom()
+  }
+  handleZoom() {
     this.trs.zoom = this.trs.scrollZoom * this.trs.baseZoom;
+
+    // ensure image can't be smaller than base zoom
+    this.trs.zoom = Math.max(this.trs.zoom, this.trs.baseZoom);
+    console.log('zoom:', this.trs.zoom, 'must be greater or equal to:', this.trs.baseZoom);
+
+    // ensure image can't be zoomed further than 400% native
+    this.trs.zoom = Math.min(this.trs.zoom, 4);
 
     this.dims = {
       ...this.dims,
@@ -227,7 +307,8 @@ export default class ContestantZoomableImage extends Vue {
     }
     console.log('trs zoom:', this.trs.zoom)
 
-    this.handleImagePosition()
+    event.preventDefault();
+    this.handleImagePosition();
   }
 
 }

@@ -38,12 +38,23 @@
           </div>
         </div>
       </div>
-      <div v-else-if="!votesAllowed">
-          <di style="text-align: center">
+      <div v-else-if="!votingStarted && !votingEnded">
+          <div style="text-align: center">
+            {{ votingStarted }} {{ votingEnded }}
             <br/><br/>
             <p><img style="max-width: 100%" src="../assets/images/not-yet.webp" /><br/></p>
             <p>Glasovanje še ni odprto za javnost.</p>
-          </di>
+            <p></p>
+            <p>Ko bo tekmovanje odprto, bi se morala stran posodobiti.</p>
+            <p><small>Če se ne, potem prosimo pomagajte in osvežite stran na roke. Prosm hvala, ker nism take sorte ork.</small></p>
+          </div>
+      </div>
+      <div v-else-if="!votingStarted && votingEnded">
+        <div style="text-align: center">
+            <br/><br/>
+            <p><img style="max-width: 100%" src="../assets/images/late.webp" /><br/></p>
+            <p>Glasovanje je zaključeno.</p>
+          </div>
       </div>
       <div v-else-if="contestants && contestants.length === 0">
         <h2>Malo prezgodej za glasovanje, eh?</h2>
@@ -163,7 +174,8 @@ export default class VotingComponent extends Vue {
   currentAvailableVotesLeft: any[] = [];
   myVotes: Vote[] = [];
   activeContestantVoteMenu?: number = -1;
-  votesAllowed?: boolean = false;
+  votingStarted?: boolean = false;
+  votingEnded?: boolean = false;
 
   backendError = false;
 
@@ -205,7 +217,8 @@ export default class VotingComponent extends Vue {
     // if this ever goes through cloudflare, this should trick it into caching
     // request made within a period of 3 seconds
     const res = await http.get(`/vote-start?ts=${(+new Date() / 3000).toFixed()}`);
-    this.votesAllowed = res.data.votesAllowed;
+    this.votingStarted = res.data.votingStarted;
+    this.votingEnded = res.data.votingEnded;
   }
 
   private async getId() {
@@ -217,7 +230,8 @@ export default class VotingComponent extends Vue {
 
       const res = await http.get('/vote-start');
 
-      this.votesAllowed = res.data.votesAllowed;
+      this.votingStarted = res.data.votingStarted;
+      this.votingEnded = res.data.votingEnded;
 
       if (voteStart === res.data.voteStart) {
         resetId = false;

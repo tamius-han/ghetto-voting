@@ -39,9 +39,9 @@
               Čas od zadnjega glasu: {{lastPublicVoteAgo}}<br/>
               Volilnih upravičencev: {{voteStatistics.voters}}<br/>
               Oddanih glasovnic: {{voteStatistics.submittedVotes}}<br/>
-              Stanje glasovanja: <span v-if="votesAllowed" style="color: #3fa">odprto</span><span v-else style="font-weight: 700; color: #f00">ZAPRTO</span><br/>
-              &nbsp;
             </template>
+            Stanje glasovanja: <span v-if="votingStarted" style="color: #3fa">odprto</span><span v-else style="font-weight: 700; color: #f00">ZAPRTO</span><br/>
+              &nbsp;
           </div>
 
           <div class="d-flex flex-row">
@@ -51,7 +51,7 @@
 
           <div class="d-flex flex-row">
             <div class="button" @click="startVoting">Začni glasovanje</div>
-            <div class="button red" @click="startVoting">Ustavi glasovanje</div>
+            <div class="button red" @click="stopVoting">Ustavi glasovanje</div>
           </div>
 
 
@@ -229,7 +229,7 @@ export default class AdminComponent extends Vue {
 
   showLoadTesting = false;
 
-  votesAllowed = false;
+  votingStarted = false;
 
   created() {
     this.reloadContestants();
@@ -258,7 +258,7 @@ export default class AdminComponent extends Vue {
     // if this ever goes through cloudflare, this should trick it into caching
     // request made within a period of 3 seconds
     const res = await http.get(`/vote-start?ts=${(+new Date() / 3000).toFixed()}`);
-    this.votesAllowed = res.data.votesAllowed;
+    this.votingStarted = res.data.votingStarted;
   }
 
 

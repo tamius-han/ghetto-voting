@@ -247,7 +247,8 @@ export default class RegisterComponent extends Vue {
     }, 500);
   }
 
-  startDelete(ci: number) {
+  // omitting 'ci' resets/cancels deletion
+  startDelete(ci?: number) {
     this.deletingIndex = ci;
     this.$forceUpdate();
   }
