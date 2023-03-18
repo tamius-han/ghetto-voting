@@ -83,6 +83,7 @@ export class GhettoBackend {
     this.voters = [];
     this.voteStart = new Date();
     this.votingStarted = false;
+    this.votingEnded = false;
     this.voteEndTime = undefined;
     this.lastPublicVoteTime = undefined;
 
