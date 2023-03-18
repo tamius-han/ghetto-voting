@@ -219,10 +219,22 @@ export class GhettoBackend {
 
   getVotingResults() {
     // initialize vote counts
-    for (const cid in this.processedVoteCandidates) {
-      this.processedVoteCandidates[cid].votes = 0;
-      this.processedVoteCandidates[cid].juryVotes = 0;
-    }
+
+      for (const cid in this.processedVoteCandidates) {
+        try {
+          this.processedVoteCandidates[cid].votes = 0;
+          this.processedVoteCandidates[cid].juryVotes = 0;
+        } catch (e) {
+          throw new Error(
+            JSON.stringify({
+              m: 'Problem processing vote candidates.',
+              cid,
+              processedVoteCandidates: this.processedVoteCandidates,
+              e
+            }, null, 2),
+          );
+        }
+      }
 
     // count public votes
     const voteRecordsArray = this.voteRecords.values();
