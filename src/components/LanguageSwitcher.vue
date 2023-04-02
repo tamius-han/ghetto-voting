@@ -2,9 +2,11 @@
 <template>
   <div>
     <div>{{ $t('languageSelect.selectLanguage') }}</div>
-    <select v-model="$root.$i18n.locale">
-      <option v-for="(lang, i) in langs" :key="`Lang${i}`" :value="lang.key">{{ lang.label }}</option>
-    </select>
+    <template v-if="$root">
+      <select v-model="$root.$i18n.locale">
+        <option v-for="(lang, i) in langs" :key="`Lang${i}`" :value="lang.key">{{ lang.label }}</option>
+      </select>
+    </template>
   </div>
 </template>
 
