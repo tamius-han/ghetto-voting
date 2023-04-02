@@ -1,21 +1,18 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
-// import Home from '../views/Results.vue'
 import VotingComponent from '../views/Voting.vue'
-// import JuryVotingComponent from '../views/JuryVoting.vue'
-// import ResultsComponent from '../views/Results.vue'
-// import RegisterComponent from '../views/Register.vue'
-// import AdminComponent from '../views/Admin.vue'
+import HomeComponent from '../views/Home.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'Home',
-    component: VotingComponent
+    component: HomeComponent,
   },
   {
-    path: '/vote',
+    path: '/vote/:contestId',
     name: 'Glasuj',
-    component: VotingComponent
+    component: VotingComponent,
+    props: true
   },
   // {
   //   path: '/results',

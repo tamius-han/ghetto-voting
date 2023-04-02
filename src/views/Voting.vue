@@ -165,6 +165,9 @@ import { Vote } from 'common/types/vote-record.interface';
   components: {
     HelloWorld,
   },
+  props: [
+    'contestId'
+  ]
 })
 export default class VotingComponent extends Vue {
   contestants?: any[] | undefined | null = null;

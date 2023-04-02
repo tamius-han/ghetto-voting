@@ -1,6 +1,6 @@
 <template>
-  <div class="page-bg"></div>
-  <div class="page-admin">
+  <!-- <div class="page-bg"></div> -->
+  <div class="page-admin flex-grow-1">
 
     <div v-if="(passwordPhase === 0)">
        <h2>No vodka, no passage.</h2>
@@ -27,6 +27,83 @@
       </h1>
 
       <div class="d-flex flex-row admin-panel-row">
+
+        <div class="panel">
+          <h3>Glasovanja</h3>
+          <div>
+            <div>Trenutno, nedavno, prihodnje</div>
+            <div>Celotna zgodovina</div>
+          </div>
+
+          <div>
+            <div v-for="voting of displayedVotings" :key="voting.id">
+              <template v-if="voting._editing">
+                todo: form
+              </template>
+              <template v-else>
+                <div class="d-flex flex-row">
+                  <div>
+                    <div class="voting-header">[{{voting.id}}] {{ voting.name }}</div>
+                    <div class="voting-description">{{ voting.description }}</div>
+                  </div>
+                  <div class="voting-data d-flex flex-row">
+                    <!-- podatki o žiriji -->
+                    <div>
+                      Žirija: todo
+                    </div>
+
+                    <!-- podatki o prijavah -->
+                    <div>
+                      <div>
+                        <b>Prijave</b>
+                      </div>
+                      <div>
+                        (status)
+                      </div>
+                      <div>zapri/odpri knof</div>
+                      <div>
+                        auto-close if applicable
+                      </div>
+                    </div>
+
+                    <!-- podatki o stanju tekmovanja -->
+                    <div>
+                      <div>
+                        <b>Glasovanje</b>
+                      </div>
+                      <div>
+                        (status)
+                      </div>
+                      <div>zapri/odpri knof</div>
+                      <div>
+                        auto-close if applicable
+                      </div>
+                    </div>
+
+                    <!-- dodatne zahteve -->
+                    <div>
+                      <div>
+                        <b>Dodatne zahteve</b>
+                      </div>
+                      <div>(oauth required?)</div>
+                      <div>require/unrequire</div>
+                    </div>
+
+                    <!-- statistike glasovanja -->
+                    <div>
+                      <div><b>Statistike</b></div>
+                      <div>Volilnih upravičencev:</div>
+                      <div>Veljavnih glasov:</div>
+                      <div>Čas od zadnjega oddanega glasu:</div>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+
+
         <div class="panel">
           <h3>Nadzor glasovanja</h3>
 
@@ -209,6 +286,17 @@ export default class AdminComponent extends Vue {
     jury: [],
     combined: [],
   };
+
+  displayedVotings = [
+    {
+      id: 1,
+      name: "Demo", description: "Demo glasovanje",
+      registrationStatus: 0, voteStatus: 3, // flags: 0x123   1-jury, 2-public (irrelevant for admin)
+      createdAt: new Date(), voteDate: '', closeRegistrationAt: null, openVotingAt: new Date(), closeVotingAt: new Date(),
+      _editing: false,
+    }
+  ];
+
 
   intermediateScoresArray = [12, 10, 8, 7, 6, 5, 4, 3, 2, 1];
   chuckNorrisVotes = [];
@@ -565,7 +653,13 @@ $thirdPlaceBronze: rgb(172, 117, 66);
   }
 
   position: relative;
-  z-index: 1;
+  // z-index: 1;
+
+  height: 100%;
+
+  background: url('../assets/images/admin-bg.webp');
+  background-size: cover;
+  background-position: 55% center;
 }
 
 .refresh-line {
