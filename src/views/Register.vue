@@ -99,7 +99,7 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import http from '@/http-common';
+import http             from '@/http-common';
 
 
 @Options({
@@ -196,7 +196,7 @@ export default class RegisterComponent extends Vue {
       this.submitting = true;
 
       await http.post(
-        `/contestants/${this.contestants[this.editingIndex]}`,
+        `/contestants/${this.contestants[this.editingIndex].id}`,
         {
           ...this.contestants[this.editingIndex],
           ...this.newContestant
