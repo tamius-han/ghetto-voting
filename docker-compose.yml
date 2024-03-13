@@ -2,6 +2,7 @@ networks:
   public:
   private:
   default:
+  db:
 
 volumes:
   vote_data:
@@ -37,7 +38,7 @@ services:
       - 'traefik.http.routers.traefik.service=api@internal'
 
   ################################################################################
-  # Frontend | 
+  # Frontend |
   ################################################################################
   client:
     image: 'druzabni/client:local'
@@ -52,7 +53,7 @@ services:
       - 'traefik.http.routers.client.rule=Host(`${PROJECT_BASE_URL}`)'
 
   ################################################################################
-  # Backend | 
+  # Backend |
   ################################################################################
   server:
     image: 'druzabni/server:local'
@@ -64,6 +65,25 @@ services:
       - 'vote_data:/workspace/data'
     networks:
       - 'private'
+      - 'db'
     labels:
       - 'traefik.enable=true'
       - 'traefik.http.routers.server.rule=Host(`api.${PROJECT_BASE_URL}`)'
+
+  # MySQL
+  db:
+    image: 'mysql'
+    networks:
+      - 'private'
+      - 'db'
+    volumes:
+      - ./data:/var/lib/msysql
+    secrets:
+      - db_username
+      - db_password
+      - db_root_password
+    environment:
+      MYSQL_USER: $MYSQL_USER
+      MYSQL_PASSWORD: $MYSQL_PASSWORD
+      MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+      MYSQL_DATABASE: $MYSQL_DATABASE

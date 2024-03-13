@@ -4,11 +4,21 @@ import fileUpload from 'express-fileupload';
 import cors from 'cors';
 import { GhettoBackend } from './ghetto-backend';
 import fs from 'fs-extra';
+import mysql, {Pool} from 'mysql2';
 
 export class Main {
   constructor() {
     const app = express();
     const port = 6969;
+
+    const db: Pool = mysql.createPool({
+      connectionLimit: 10,
+      host: 'db',
+      user: process.env.MYSQL_USER,
+      password: process.env.MYSQL_PASSWORD,
+      database: process.env.MYSQL_DATABASE
+    });
+
 
     const backend = new GhettoBackend();
     const jsonParser = bodyParser.json();

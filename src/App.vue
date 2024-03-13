@@ -1,6 +1,6 @@
 <template>
   <div id="nav" class="d-flex flex-row w-100">
-    <div class="flex-grow-1">
+    <!-- <div class="flex-grow-1">
       Glasovanje:<br/>
       <b>IME GLASOVANJA TLE</b>
     </div>
@@ -44,7 +44,7 @@
         <p></p>
         <button></button>
       </div>
-    </div>
+    </div> -->
   </div>
   <div class="flex-grow-1 d-flex flex-column">
     <router-view/>
