@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { VoteCandidate } from './../common/types/vote-candidate.interface';
+import { VoteCandidate }    from './../common/types/vote-candidate.interface';
 import { Vote, VoteRecord } from '../common/types/vote-record.interface';
-import { VoteValidator } from './vote-validator';
-import fs from 'fs-extra';
-import sharp from 'sharp';
+import { VoteValidator }    from './vote-validator';
+import fs                   from 'fs-extra';
+import sharp                from 'sharp';
 
 export class GhettoBackend {
   voteRecords: Map<string, VoteRecord>;
@@ -325,9 +325,9 @@ export class GhettoBackend {
   }
 
   updateContestant(contestant: VoteCandidate) {
-    const i = this.voteCandidates.findIndex(x => x.id === contestant.id);
+    const i = this.voteCandidates.findIndex(x => +x.id === +contestant.id);
 
-    if (i !== -1) {
+    if (i === -1) {
       throw 'CONTESTANT_DOES_NOT_EXIST';
     }
 
