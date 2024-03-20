@@ -242,12 +242,26 @@ export default class JuryVotingComponent extends Vue {
 
   private async getJuryVotes() {
     const res = await http.get('/jury-votes');
-    if (res.data.votes && res.data.votes.length === this.juryVotes.length) {
+
+    // initial page load: ensure correct size of jury
+    if (res.data.votes) {
+      this.jurySize = res.data.votes[0].length;
+
+      if (this.juryMembers.length > this.jurySize) {
+        this.juryMembers.splice(this.jurySize);
+      } else {
+        for (let i = this.juryMembers.length; i < this.jurySize; i++) {
+          this.juryMembers.push('<vstavi ime>');
+        }
+      }
+
       for (let i = 0; i < res.data.votes.length; i++ ) {
         for (let j = 0; j < res.data.votes[i].length; j++) {
           this.juryVotes[i][j] = `${res.data.votes[i][j]}`;
         }
       }
+
+      this.$forceUpdate();
     }
   }
 
@@ -277,7 +291,7 @@ export default class JuryVotingComponent extends Vue {
 
     // we clear any jury votes
     for (let i = 0; i < this.juryVotes.length; i++) {
-      this.juryVotes[i] = new Array(this.jurySize);
+      this.juryVotes[i] = new Array(this.juryMembers.length);
     }
     this.updateJuryVotes();
 
