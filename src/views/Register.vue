@@ -23,15 +23,15 @@
           </div>
           <div v-if="editingIndex === index">
             <div class="field my-2">
-              <div>Ime kostuma:</div>
+              <div>Nastopajoči:</div>
               <div class="w-100">
-                <input v-model="newContestant.title" />
+                <input v-model="newContestant.name" />
               </div>
             </div>
             <div class="field my-2">
-              <div>Nastopajoči:</div>
+              <div>Ime kostuma:</div>
               <div class="w-100">
-                <input v-model="newContestant.name" @keypress.enter="(editingIndex === undefined) ? addNewContestant() : updateContestant()"/>
+                <input v-model="newContestant.title" @keypress.enter="(editingIndex === undefined) ? addNewContestant() : updateContestant()" />
               </div>
             </div>
             <div class="d-flex flex-row">
@@ -63,17 +63,18 @@
         <h3 v-else>Uredi tekmovalca</h3>
         <div v-if="!submitting">
           <div class="field my-2">
-            <div>Ime kostuma:</div>
+            <div>Nastopajoči:</div>
             <div class="w-100">
-              <input v-model="newContestant.title" />
+              <input v-model="newContestant.name" />
             </div>
           </div>
           <div class="field my-2">
-            <div>Nastopajoči:</div>
+            <div>Ime kostuma:</div>
             <div class="w-100">
-              <input v-model="newContestant.name" @keypress.enter="(editingIndex === undefined) ? addNewContestant() : updateContestant()"/>
+              <input v-model="newContestant.title"  @keypress.enter="(editingIndex === undefined) ? addNewContestant() : updateContestant()" />
             </div>
           </div>
+
           <div class="d-flex flex-row">
           <div v-if="(editingIndex === undefined)" class="button" @click="addNewContestant()">
             Dodaj
