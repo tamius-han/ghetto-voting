@@ -1,8 +1,11 @@
 <template>
   <div class="h-100 relative">
-    <div v-if="contestants && contestants.length > 0" class="remaining-votes-header d-flex flex-row sticky-top w-100">
+    <div v-if="!hideRemainingVotesHeader && contestants && contestants.length > 0" class="remaining-votes-header d-flex flex-row sticky-top w-100">
       <div class="d-flex flex-column justify-content-center align-items-center w-100 p-2">
-        <div class="smaller">NEPODELJENI GLASOVI:</div>
+        <div class="smaller">
+          <template v-if="currentAvailableVotesLeft.length">NEPODELJENI GLASOVI:</template>
+          <template v-else>VAŠI GLASOVI SO BILI ZABELEŽENI.</template>
+        </div>
         <template v-if="currentAvailableVotesLeft.length">
           <div class="d-flex flex-row flex-wrap">
             <div
@@ -16,7 +19,18 @@
           <div class="smallest">DA BO VAŠ GLAS ŠTEL V GLASOVANJU, MORATE PODELITI VSE GLASOVE</div>
         </template>
         <template v-else>
-          <div class="smallest">PODELILI STE VSE SVOJE GLASOVE. DO KONCA GLASOVANJA SI ŠE LAHKO PREMISLITE TER SPREMENITE SVOJ GLAS.</div>
+          <div class="smallest d-flex flex-row">
+            <div class="grow-1">
+              DO KONCA GLASOVANJA SI ŠE LAHKO PREMISLITE TER SPREMENITE SVOJ GLAS.
+            </div>
+            <button
+              class="dummy-button cursor-pointer grow-0 shrink-0"
+              @click="hideRemainingVotesHeader = true"
+            >
+              V redu
+            </button>
+          </div>
+
         </template>
       </div>
 
@@ -178,6 +192,7 @@ export default class VotingComponent extends Vue {
   votingEnded?: boolean = false;
 
   backendError = false;
+  hideRemainingVotesHeader= false;
 
   voteCheckInterval: any;
 
@@ -271,6 +286,13 @@ export default class VotingComponent extends Vue {
     }
     for (const vote of this.myVotes) {
       this.decreaseAvailableVotes(vote.points);
+    }
+
+    // if user has 0 available votes on page load, we DO NOT show the banner.
+    // however, we keep showing the banner if vote count freshly went to 0 due
+    // to user interaction.
+    if (this.currentAvailableVotesLeft.length === 0) {
+      this.hideRemainingVotesHeader = true;
     }
   }
 
@@ -366,6 +388,9 @@ export default class VotingComponent extends Vue {
     try {
       await http.post('/vote', {votes: this.myVotes});
       console.log('voted for', contestantIndex, 'gave them', points, 'points');
+
+      // ensure the banner always turns visible after any successful vote
+      this.hideRemainingVotesHeader = false;
     } catch (e) {
       console.error('proble with voting. voting probably restarted. Reseting our ID and recasting vote');
       console.error('error:', e);
@@ -429,6 +454,24 @@ export default class VotingComponent extends Vue {
 
 .no-image-overlay {
   padding: 2rem;
+}
+
+.grow-1 {
+  flex-grow: 1
+}
+.grow-0 {
+  flex-grow: 0;
+}
+.shrink-0 {
+  flex-shrink: 0;
+}
+
+.dummy-button {
+  padding: 0.5rem 1rem;
+  background-color: rgba(255, 152, 69, 0.90);
+  text-transform: uppercase;
+  border: 0px;
+  font-size: 0.75rem;
 }
 
 .contestant-image {
