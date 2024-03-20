@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 // import Home from '../views/Results.vue'
-import VotingComponent from '../views/Voting.vue'
+import VotingComponent                                    from '../views/Voting.vue'
 // import JuryVotingComponent from '../views/JuryVoting.vue'
 // import ResultsComponent from '../views/Results.vue'
 // import RegisterComponent from '../views/Register.vue'
@@ -40,6 +40,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Administracija',
     // component: AdminComponent
     component: () => import(/* webpackChunkName: "admin" */ '../views/Admin.vue')
+  },
+  {
+    path: '/oder',
+    name: 'Oder',
+    component: () => import(/* webpackChunkName: "oder" */ '../views/Stage.vue')
   }
 ]
 
